@@ -64,7 +64,7 @@ namespace Server.Endpoints
             }
 
             //JWT token generation would go here
-            return Results.Ok(user);
+            return Results.Ok(user.ToUserResponse("token")); // Placeholder for JWT token
         }
 
     }

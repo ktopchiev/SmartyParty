@@ -1,3 +1,7 @@
+import { LoginForm } from "./LoginForm";
+import { NavLink } from "react-router";
+import { RegisterForm } from "./RegisterForm";
+
 export default function Header() {
     return (
 
@@ -5,7 +9,7 @@ export default function Header() {
             <nav className="navbar bg-body-tertiary fixed-top">
                 <div className="container-fluid d-flex justify-content-between">
                     <div>
-                        <a className="navbar-brand" href="#">Smarty Party</a>
+                        <NavLink to="/" className="navbar-brand">SmartyParty</NavLink>
                     </div>
                     <div>
                         <button className="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbarLogin" aria-controls="offcanvasNavbarLogin" aria-label="Toggle navigation">
@@ -21,7 +25,7 @@ export default function Header() {
                                 <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                             </div>
                             <div className="offcanvas-body">
-                                {/* Login form will be here */}
+                                <LoginForm />
                             </div>
                         </div>
                         <div className="offcanvas offcanvas-end" tabIndex={-1} id="offcanvasNavbarRegister" aria-labelledby="offcanvasNavbarRegisterLabel">
@@ -30,12 +34,12 @@ export default function Header() {
                                 <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                             </div>
                             <div className="offcanvas-body">
-                                {/* Register form will be here */}
+                                <RegisterForm />
                             </div>
                         </div>
                     </div>
                 </div>
-            </nav>
+            </nav >
         </>
 
     )

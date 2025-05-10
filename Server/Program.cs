@@ -20,16 +20,7 @@ builder.Services.AddDbContext<SmartyPartyDbContext>(options =>
 
 builder.Services.AddSignalR();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("client",
-        builder =>
-        {
-            builder.WithOrigins("http://localhost:5173/")
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
-        });
-});
+builder.Services.AddCors();
 
 // builder.Services.AddAuthentication()
 //     .AddJwtBearer()
@@ -49,7 +40,13 @@ if (app.Environment.IsDevelopment())
 
 // app.UseDefaultFiles();
 // app.UseStaticFiles();
-app.UseCors("client");
+app.UseCors(options =>
+{
+    options.WithOrigins("http://localhost:5173")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+});
 
 // app.UseAuthentication();
 // app.UseAuthorization();
