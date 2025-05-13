@@ -3,6 +3,10 @@ import { useNavigate } from "react-router";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import * as bootstrap from 'bootstrap';
 import { toast } from "react-toastify";
+import { useLoginMutation } from "../services/user/userApi";
+import type { LoginModel } from "../models/LoginModel";
+import { setCurrentUser } from "../services/user/userSlice";
+import { useAppDispatch } from "../services/store";
 
 type FormData = {
     username: string;
@@ -11,46 +15,36 @@ type FormData = {
 
 export function LoginForm() {
     const { register, handleSubmit } = useForm<FormData>();
+    const [login] = useLoginMutation();
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    const onSubmit = handleSubmit((data: FormData) => {
-        fetch("http://localhost:5255/api/user/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then((data) => {
-                console.log("Success:", data);
-                toast.success('You have been logged in successfully');
-                const offcanvas = document.getElementById("offcanvasNavbarLogin");
-                if (offcanvas) {
-                    const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvas);
-                    if (bsOffcanvas) {
-                        bsOffcanvas.hide();
-                    }
-                }
-                navigate("/");
-            })
-            .catch((error) => {
-                console.error("Error:", error);
-                toast.error('Login failed - please try again');
-            });
-    });
+    const handleLogin = async (data: FormData) => {
+
+        event?.preventDefault();
+
+        const loginModel: LoginModel = {
+            Username: data.username,
+            Password: data.password,
+        }
+
+        try {
+            const response = await login(loginModel).unwrap();
+            localStorage.setItem("user", JSON.stringify(response));
+            dispatch(setCurrentUser(response));
+            toast.success("User logged in successfuly!");
+            navigate('/');
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
         <div>
             <div>
                 <img src="./images/Smarty_Shiba_Inu_Image_Blue.png" className="img-thumbnail rounded-circle mx-auto d-block" style={{ width: "200px" }} alt="login-img" />
             </div>
-            <form onSubmit={onSubmit} className="container mt-3">
+            <form onSubmit={handleSubmit(handleLogin)} className="container mt-3">
                 <div className="mb-3">
                     <label htmlFor="inputUserName" className="form-label">Username</label>
                     <input type="username" className="form-control" id="inputUserName" aria-describedby="userNameHelp" {...register("username")} />

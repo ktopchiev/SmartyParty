@@ -9,15 +9,19 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { BrowserRouter, Route, Routes } from 'react-router';
 import HomePage from './features/HomePage.tsx';
+import { Provider } from 'react-redux';
+import { store } from './services/store.ts';
 
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<App />} >
-        <Route index element={<HomePage />} />
-        {/* <Route path="about" element={<AboutPage />} /> */}
-        {/* <Route path="*" element={<NotFoundPage />} /> */}
-      </Route>
-    </Routes>
-  </BrowserRouter>
+  <Provider store={store}>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<App />} >
+          <Route index element={<HomePage />} />
+          {/* <Route path="about" element={<AboutPage />} /> */}
+          {/* <Route path="*" element={<NotFoundPage />} /> */}
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  </Provider>
 )

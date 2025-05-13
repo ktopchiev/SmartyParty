@@ -1,18 +1,44 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Server.Data;
 using Server.Endpoints;
 using Server.Hubs;
+using Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// builder.Services.AddAuthorizationBuilder()
-//   .AddPolicy("admin_greetings", policy =>
-//         policy
-//             .RequireRole("admin")
-//             .RequireClaim("scope", "greetings_api"));
-
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+    {
+        var jwtSecurityScheme = new OpenApiSecurityScheme
+        {
+            BearerFormat = "JWT",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = JwtBearerDefaults.AuthenticationScheme,
+            Description = "Put Bearer + your token in the box below",
+            Reference = new OpenApiReference
+            {
+                Id = JwtBearerDefaults.AuthenticationScheme,
+                Type = ReferenceType.SecurityScheme
+            }
+        };
+
+        c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                jwtSecurityScheme, Array.Empty<string>()
+            }
+        });
+    });
+
+builder.Services.AddScoped<TokenService>();
 
 builder.Services.AddDbContext<SmartyPartyDbContext>(options =>
 
@@ -22,10 +48,18 @@ builder.Services.AddSignalR();
 
 builder.Services.AddCors();
 
-// builder.Services.AddAuthentication()
-//     .AddJwtBearer()
-//     .AddJwtBearer("LocalAuthIssuer");
-// builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opt =>
+    {
+        opt.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
 
 var app = builder.Build();
 
@@ -40,6 +74,7 @@ if (app.Environment.IsDevelopment())
 
 // app.UseDefaultFiles();
 // app.UseStaticFiles();
+
 app.UseCors(options =>
 {
     options.WithOrigins("http://localhost:5173")
@@ -48,8 +83,8 @@ app.UseCors(options =>
         .AllowCredentials();
 });
 
-// app.UseAuthentication();
-// app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapHub<GameHub>("/hub");
 
