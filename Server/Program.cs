@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Server.Controllers;
 using Server.Data;
 using Server.Endpoints;
 using Server.Hubs;
@@ -11,6 +12,7 @@ using Server.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
     {
         var jwtSecurityScheme = new OpenApiSecurityScheme
@@ -38,6 +40,8 @@ builder.Services.AddSwaggerGen(c =>
         });
     });
 
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<AIQuestionService>();
 builder.Services.AddScoped<TokenService>();
 
 builder.Services.AddDbContext<SmartyPartyDbContext>(options =>
@@ -89,6 +93,7 @@ app.UseAuthorization();
 app.MapHub<GameHub>("/hub");
 
 app.MapUserEndpoints();
+app.MapQuestionEndpoints();
 
 var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<SmartyPartyDbContext>();
