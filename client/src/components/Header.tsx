@@ -6,7 +6,7 @@ export default function Header() {
     return (
 
         <>
-            <nav className="navbar bg-body-tertiary fixed-top">
+            <nav className="navbar bg-body-secondary" style={{ zIndex: 1000 }}>
                 <div className="container-fluid d-flex justify-content-between">
                     <div>
                         <NavLink to="/" className="navbar-brand">SmartyParty</NavLink>

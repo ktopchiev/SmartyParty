@@ -11,6 +11,7 @@ import { BrowserRouter, Route, Routes } from 'react-router';
 import HomePage from './features/HomePage.tsx';
 import { Provider } from 'react-redux';
 import { store } from './services/store.ts';
+import QuizPage from './features/QuizPage.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route path="/" element={<App />} >
           <Route index element={<HomePage />} />
+          <Route path="quiz" element={<QuizPage />} />
           {/* <Route path="about" element={<AboutPage />} /> */}
           {/* <Route path="*" element={<NotFoundPage />} /> */}
         </Route>
