@@ -3,14 +3,17 @@ import { NavLink, useNavigate } from "react-router";
 import { RegisterForm } from "./RegisterForm";
 import { useAppDispatch, useAppSelector } from "../services/store";
 import { setLogOut } from "../services/user/userSlice";
+import SignalRService from "../services/signalR/SignalRService";
 
 export default function Header() {
+
     const { loggedIn, user } = useAppSelector((state) => state.user);
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
     const handleLogout = () => {
         dispatch(setLogOut());
+        SignalRService.stopUserRoomConnection();
         navigate("/");
     }
 
@@ -74,3 +77,4 @@ export default function Header() {
 
     )
 }
+

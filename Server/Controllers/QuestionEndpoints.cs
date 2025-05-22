@@ -12,14 +12,14 @@ namespace Server.Controllers
                 .Produces(StatusCodes.Status404NotFound);
         }
 
-        public static async Task<IResult> GetQuestions(string topic, AIQuestionService ai)
+        public static async Task<IResult> GetQuestions(string topic, string language, AIQuestionService ai)
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
                 return Results.BadRequest(new { message = "Topic is required" });
             }
 
-            var questionsJson = await ai.GenerateQuestionsAsync(topic);
+            var questionsJson = await ai.GenerateQuestionsAsync(topic, language);
             if (questionsJson == null)
             {
                 return Results.NotFound(new { message = "No questions found" });

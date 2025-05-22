@@ -1,12 +1,12 @@
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import * as bootstrap from 'bootstrap';
 import { toast } from "react-toastify";
 import { useLoginMutation } from "../services/user/userApi";
 import type { LoginModel } from "../models/LoginModel";
 import { setCurrentUser } from "../services/user/userSlice";
 import { useAppDispatch } from "../services/store";
+import SignalRService from "../services/signalR/SignalRService";
 
 type FormData = {
     username: string;
@@ -14,6 +14,7 @@ type FormData = {
 }
 
 export function LoginForm() {
+
     const { register, handleSubmit } = useForm<FormData>();
     const [login] = useLoginMutation();
     const dispatch = useAppDispatch();
@@ -34,6 +35,7 @@ export function LoginForm() {
             dispatch(setCurrentUser(response));
             toast.success("User logged in successfuly!");
             navigate('/');
+
         } catch (error) {
             console.log(error);
         }

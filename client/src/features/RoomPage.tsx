@@ -1,6 +1,6 @@
 import QuizCard from "../components/QuizCard";
 
-export default function QuizPage() {
+export default function RoomPage() {
 
     let room = "roomId"; // This should be replaced with the actual room ID logic
     let topic = "General Knowledge"; // This should be replaced with the actual topic logic

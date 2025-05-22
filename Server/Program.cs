@@ -6,7 +6,6 @@ using Microsoft.OpenApi.Models;
 using Server.Controllers;
 using Server.Data;
 using Server.Endpoints;
-using Server.Hubs;
 using Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,6 +42,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<AIQuestionService>();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<UserConnectionService>();
 
 builder.Services.AddDbContext<SmartyPartyDbContext>(options =>
 
@@ -90,7 +90,7 @@ app.UseCors(options =>
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<GameHub>("/hub");
+app.MapHub<ConnectionUserHub>("/hubs/connectionuser");
 
 app.MapUserEndpoints();
 app.MapQuestionEndpoints();

@@ -77,7 +77,7 @@ namespace Server.Endpoints
         public static async Task<IResult> Refresh(TokenService tokenService, HttpContext httpContext, SmartyPartyDbContext dbContext)
         {
             var userPrincipal = httpContext.User;
-            if (userPrincipal == null || !userPrincipal.Identity.IsAuthenticated)
+            if (userPrincipal == null || !userPrincipal.Identity!.IsAuthenticated)
             {
                 return Results.Unauthorized();
             }

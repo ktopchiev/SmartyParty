@@ -15,10 +15,11 @@ public class AIQuestionService
         _httpClient = new HttpClient();
     }
 
-    public async Task<JObject[]> GenerateQuestionsAsync(string topic)
+    public async Task<JObject[]> GenerateQuestionsAsync(string topic, string language = "en")
     {
         var prompt = $$"""
         Generate 5 multiple-choice quiz questions on the topic: "{{topic}}".
+        In {{language}} language.
         Format the response as a JSON array:
         [
           {
@@ -61,7 +62,7 @@ public class AIQuestionService
         }
 
         var firstChoice = choices[0];
-        
+
         var message = firstChoice["message"];
         if (message == null)
         {
