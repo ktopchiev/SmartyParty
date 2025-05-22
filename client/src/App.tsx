@@ -8,7 +8,6 @@ import { useAppDispatch } from "./services/store"
 import { useRefreshMutation } from "./services/user/userApi"
 import { setCurrentUser } from "./services/user/userSlice"
 import { getJwtTokenFromLocalStorage } from "./util/utility"
-import SignalRService from "./services/signalR/SignalRService"
 
 function App() {
 

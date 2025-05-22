@@ -33,7 +33,7 @@ public class ConnectionUserHub : Hub
         await Clients.Group(answer.RoomId).SendAsync("ReceiveAnswer", Context.ConnectionId, answer);
     }
 
-    public async Task CreateRoom(PlayerDto player, RoomDto room)
+    public async Task CreateRoom(PlayerDto player, RoomRequest room)
     {
         if (string.IsNullOrWhiteSpace(room.Name) || string.IsNullOrWhiteSpace(room.Topic))
         {
@@ -60,7 +60,7 @@ public class ConnectionUserHub : Hub
         }
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-        await Clients.Caller.SendAsync("RoomCreated", newRoom);
+        await Clients.Caller.SendAsync("RoomCreated", newRoom.ToRoomResponse());
     }
 
     public async Task JoinRoom(string roomId, PlayerDto player)
@@ -98,6 +98,29 @@ public class ConnectionUserHub : Hub
 
         var players = _userConnectionService.GetPlayersInRoom(roomId);
         await Clients.Caller.SendAsync("ReceivePlayersInRoom", players);
+    }
+
+    public async Task GetRooms()
+    {
+        var rooms = _userConnectionService.GetRooms();
+        var roomResponses = rooms.Select(r => r.ToRoomResponse()).ToList();
+        await Clients.Caller.SendAsync("ReceiveRooms", roomResponses);
+    }
+
+    public async Task GetRoomById(string roomId)
+    {
+        if (string.IsNullOrWhiteSpace(roomId))
+        {
+            throw new HubException("Invalid room ID");
+        }
+
+        var room = _userConnectionService.GetRoomById(roomId);
+        if (room == null)
+        {
+            throw new HubException("Room not found");
+        }
+
+        await Clients.Caller.SendAsync("ReceiveRoom", room.ToRoomResponse());
     }
 
 }

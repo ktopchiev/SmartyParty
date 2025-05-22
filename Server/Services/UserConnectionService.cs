@@ -73,9 +73,9 @@ namespace Server.Services
             return _Players;
         }
 
-        public Room? GetRoomByName(string roomName)
+        public Room? GetRoomById(string roomId)
         {
-            return _Rooms.FirstOrDefault(r => r.Name == roomName);
+            return _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
         }
 
         public Player? GetPlayerByConnectionId(string connectionId)

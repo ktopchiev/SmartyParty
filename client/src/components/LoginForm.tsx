@@ -6,7 +6,6 @@ import { useLoginMutation } from "../services/user/userApi";
 import type { LoginModel } from "../models/LoginModel";
 import { setCurrentUser } from "../services/user/userSlice";
 import { useAppDispatch } from "../services/store";
-import SignalRService from "../services/signalR/SignalRService";
 
 type FormData = {
     username: string;

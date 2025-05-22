@@ -1,4 +1,5 @@
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from "@microsoft/signalr";
+import type { PlayerDto } from "../../models/PlayerDto";
 
 class SignalRService {
 
@@ -33,13 +34,78 @@ class SignalRService {
             });
 
             try {
-                await this.signalRConnection?.start();
+                await this.signalRConnection?.start().catch((error) => console.error(error));
                 console.assert(this.signalRConnection?.state as HubConnectionState === HubConnectionState.Connected);
                 console.log("SignalR connection started.");
             } catch (error) {
                 console.assert(this.signalRConnection?.state === HubConnectionState.Disconnected);
                 console.log(error);
             }
+        }
+    }
+
+    public async createRoom(roomName: string, topic: string) {
+        if (!this.signalRConnection) {
+            console.error("SignalR connection is not established.");
+            return;
+        }
+
+        try {
+            return await this.signalRConnection?.invoke("CreateRoom", roomName, topic);
+        } catch (error) {
+            console.error("Error creating room:", error);
+        }
+    }
+
+    public async joinRoom(roomId: string, player: PlayerDto) {
+        if (!this.signalRConnection) {
+            console.error("SignalR connection is not established.");
+            return;
+        }
+
+        try {
+            return await this.signalRConnection?.invoke("JoinRoom", roomId, player);
+        } catch (error) {
+            console.error("Error joining room:", error);
+        }
+    }
+
+    public async leaveRoom(roomId: string, player: PlayerDto) {
+        if (!this.signalRConnection) {
+            console.error("SignalR connection is not established.");
+            return;
+        }
+
+        try {
+            return await this.signalRConnection?.invoke("LeaveRoom", roomId, player);
+        } catch (error) {
+            console.error("Error leaving room:", error);
+        }
+    }
+
+    public async getRooms() {
+        if (!this.signalRConnection) {
+            console.error("SignalR connection is not established.");
+            return;
+        }
+
+        try {
+            return await this.signalRConnection?.invoke("GetRooms");
+        } catch (error) {
+            console.error("Error getting rooms:", error);
+        }
+    }
+
+    public async getRoomById(roomId: string) {
+        if (!this.signalRConnection) {
+            console.error("SignalR connection is not established.");
+            return;
+        }
+
+        try {
+            return await this.signalRConnection?.invoke("GetRoom", roomId);
+        } catch (error) {
+            console.error("Error getting room:", error);
         }
     }
 
