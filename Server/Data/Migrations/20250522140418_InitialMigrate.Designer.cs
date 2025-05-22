@@ -10,7 +10,7 @@ using Server.Data;
 namespace Server.Data.Migrations
 {
     [DbContext(typeof(SmartyPartyDbContext))]
-    [Migration("20250509132114_InitialMigrate")]
+    [Migration("20250522140418_InitialMigrate")]
     partial class InitialMigrate
     {
         /// <inheritdoc />
