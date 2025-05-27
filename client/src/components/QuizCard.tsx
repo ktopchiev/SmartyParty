@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import type Room from '../models/Room';
+import { useAppSelector } from '../services/store';
 
 type Option = {
     text: string;
     isCorrect: boolean;
 };
 
-type QuizCardProps = {
-    room: Room | null;
-};
 
 const questionIndex = 1; // This should be dynamic based on the current question
 const totalQuestions = 10; // This should be dynamic based on the total number of questions
@@ -21,13 +18,12 @@ const options: Option[] = [
 ]; // This should be dynamic based on the current question
 const timer = 30; // This should be dynamic based on the game settings
 
-const QuizCard: React.FC<QuizCardProps> = ({
-    room
-}) => {
+const QuizCard: React.FC = () => {
 
     const [selected, setSelected] = useState<number | null>(null);
     const [showAnswer, setShowAnswer] = useState(false);
     const [countdown, setCountdown] = useState(timer);
+    const { roomState: room } = useAppSelector((state) => state.room);
 
     useEffect(() => {
         setCountdown(timer);

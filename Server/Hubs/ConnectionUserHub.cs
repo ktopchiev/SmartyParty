@@ -33,19 +33,16 @@ public class ConnectionUserHub : Hub
         await Clients.Group(answer.RoomId).SendAsync("ReceiveAnswer", Context.ConnectionId, answer);
     }
 
-    public async Task CreateRoom(PlayerDto player, RoomRequest room)
+    public async Task CreateRoom(string username, string roomName, string topic)
     {
-        if (string.IsNullOrWhiteSpace(room.Name) || string.IsNullOrWhiteSpace(room.Topic))
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(topic))
         {
             throw new HubException("Invalid room details");
         }
 
-        if (string.IsNullOrWhiteSpace(player.Username))
-        {
-            throw new HubException("Invalid username");
-        }
+        _userConnectionService.AddPlayer(username, Context.ConnectionId);
 
-        var newRoom = _userConnectionService.AddRoom(room.Name, room.Topic, player.Username, Context.ConnectionId);
+        var newRoom = _userConnectionService.AddRoom(roomName, topic, username, Context.ConnectionId);
 
         if (newRoom == null)
         {

@@ -1,14 +1,17 @@
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from "@microsoft/signalr";
 import type { PlayerDto } from "../../models/PlayerDto";
+import { store } from "../store";
+import { setRoom } from "./connectionUserSlice";
+import type Room from "../../models/Room";
 
 class SignalRService {
 
     private signalRConnection: HubConnection | null = null;
     private baseUrl: string = import.meta.env.VITE_APP_HUBS_URL;
+    private onRoomCreatedCallback: ((room: Room) => void) | null = null;
 
     constructor() {
         console.log("Creating SignalR connection...");
-
         this.signalRConnection = new HubConnectionBuilder()
             .withUrl(`${this.baseUrl}connectionuser`)
             .configureLogging("Information")
@@ -41,17 +44,36 @@ class SignalRService {
                 console.assert(this.signalRConnection?.state === HubConnectionState.Disconnected);
                 console.log(error);
             }
+
+            this.signalRConnection?.on("RoomCreated", (room) => {
+                console.log("Room created:", room);
+                store.dispatch(setRoom(room));
+                if (this.onRoomCreatedCallback) {
+                    this.onRoomCreatedCallback(room);
+                }
+            });
         }
     }
 
-    public async createRoom(roomName: string, topic: string) {
+    public setOnRoomCreatedCallback(callback: (room: Room) => void) {
+        this.onRoomCreatedCallback = callback;
+    }
+
+    public async createRoom(username: string, roomName: string, topic: string) {
         if (!this.signalRConnection) {
             console.error("SignalR connection is not established.");
             return;
         }
 
         try {
-            return await this.signalRConnection?.invoke("CreateRoom", roomName, topic);
+            console.log("Creating room with name:", roomName, "and topic:", topic);
+            if (!roomName || !topic) {
+                console.error("Room name and topic are required to create a room.");
+                return;
+            }
+            let roomResponse = await this.signalRConnection?.invoke("CreateRoom", username, roomName, topic);
+            console.log("Room created successfully:", roomResponse);
+            return roomResponse;
         } catch (error) {
             console.error("Error creating room:", error);
         }
@@ -69,6 +91,7 @@ class SignalRService {
             console.error("Error joining room:", error);
         }
     }
+
 
     public async leaveRoom(roomId: string, player: PlayerDto) {
         if (!this.signalRConnection) {
@@ -111,18 +134,16 @@ class SignalRService {
 
     public stopUserRoomConnection() {
 
-        if (!this.signalRConnection) {
-            console.error("SignalR connection is not established.");
-            return;
-        }
+        if (this.signalRConnection) {
 
-        return this.signalRConnection?.stop()
-            .then(() => {
-                console.assert(this.signalRConnection?.state === HubConnectionState.Disconnected);
-                this.signalRConnection = null;
-                console.log("SignalR connection stopped.");
-            })
-            .catch(error => console.log(error));
+            return this.signalRConnection?.stop()
+                .then(() => {
+                    console.assert(this.signalRConnection?.state === HubConnectionState.Disconnected);
+                    this.signalRConnection = null;
+                    console.log("SignalR connection stopped.");
+                })
+                .catch(error => console.log(error));
+        }
     }
 }
 
