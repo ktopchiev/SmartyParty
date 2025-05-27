@@ -48,7 +48,12 @@ builder.Services.AddDbContext<SmartyPartyDbContext>(options =>
 
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR()
+.AddHubOptions<ConnectionUserHub>(options =>
+{
+    options.EnableDetailedErrors = true;
+    options.MaximumReceiveMessageSize = 1024000; // 1 MB
+});
 
 builder.Services.AddCors();
 
@@ -90,10 +95,10 @@ app.UseCors(options =>
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<ConnectionUserHub>("/hubs/connectionuser");
 
 app.MapUserEndpoints();
 app.MapQuestionEndpoints();
+app.MapHub<ConnectionUserHub>("/hubs/connectionuser");
 
 var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<SmartyPartyDbContext>();

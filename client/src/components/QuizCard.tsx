@@ -44,7 +44,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
         return () => clearInterval(interval);
     }, [questionIndex, timer]);
 
-    const handleSelect = (option: Option, index: number) => {
+    const handleSelect = (_option: Option, index: number) => {
         if (showAnswer) return;
         setSelected(index);
         setShowAnswer(true);
