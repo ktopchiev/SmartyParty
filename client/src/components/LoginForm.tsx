@@ -18,7 +18,7 @@ type FormData = {
 
 export function LoginForm() {
 
-    const { register, handleSubmit } = useForm<FormData>();
+    const { register, handleSubmit, reset } = useForm<FormData>();
     const [login] = useLoginMutation();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -37,6 +37,7 @@ export function LoginForm() {
             const response = await login(loginRequest).unwrap();
             localStorage.setItem("user", JSON.stringify(response));
             dispatch(setCurrentUser(response));
+            reset();
             await SignalRService.startUserRoomConnection();
             toast.success("User logged in successfuly!");
             closeBsOffcanvas();

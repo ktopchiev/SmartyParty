@@ -11,7 +11,7 @@ type FormData = {
 }
 
 export function RegisterForm() {
-    const { register, handleSubmit, setError, formState: { errors } } = useForm<FormData>();
+    const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<FormData>();
     const navigate = useNavigate();
 
     const onSubmit = handleSubmit((data: FormData) => {
@@ -31,6 +31,7 @@ export function RegisterForm() {
             })
             .then((data) => {
                 console.log("Success:", data);
+                reset();
                 toast.success('Registration have been successful - you can login now');
                 closeBsOffcanvas();
                 navigate("/");
