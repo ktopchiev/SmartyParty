@@ -6,5 +6,7 @@ namespace Server.Models
         public required string Name { get; set; }
         public required string Topic { get; set; }
         public List<Player> Players { get; set; } = new List<Player>();
+        public List<Message> Messages { get; set; } = new List<Message>();
+
     }
 }

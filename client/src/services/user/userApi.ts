@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { UserResponse } from "../../models/UserResponse";
-import type { LoginModel } from "../../models/LoginModel";
-import type UserRegisterModel from "../../models/UserRegisterModel";
+import type { User } from "../../models/User";
+import type { LoginRequest } from "../../models/LoginRequest";
+import type RegisterRequest from "../../models/RegisterRequest";
 import { getJwtTokenFromLocalStorage } from "../../util/utility";
 
 export const userApi = createApi({
@@ -13,7 +13,7 @@ export const userApi = createApi({
     tagTypes: ['User'],
     endpoints: (build) => {
         return {
-            login: build.mutation<UserResponse, LoginModel | null>({
+            login: build.mutation<User, LoginRequest | null>({
                 query: (credentials) => (
                     {
                         url: "user/login",
@@ -23,7 +23,7 @@ export const userApi = createApi({
                 ),
                 invalidatesTags: ['User']
             }),
-            refresh: build.mutation<UserResponse, void>({
+            refresh: build.mutation<User, void>({
                 query: () => ({
                     url: "user/refresh",
                     method: "POST",
@@ -32,7 +32,7 @@ export const userApi = createApi({
                     }
                 })
             }),
-            registerUser: build.mutation<string, UserRegisterModel>({
+            registerUser: build.mutation<string, RegisterRequest>({
                 query: (credentials) => ({
                     url: "user/register",
                     method: "POST",

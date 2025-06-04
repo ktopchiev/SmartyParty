@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import * as bootstrap from 'bootstrap';
 import { toast } from "react-toastify";
+import { closeBsOffcanvas } from "../util/utility";
 
 type FormData = {
     username: string;
@@ -11,7 +11,7 @@ type FormData = {
 }
 
 export function RegisterForm() {
-    const { register, handleSubmit, setError, formState: { errors } } = useForm<FormData>();
+    const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<FormData>();
     const navigate = useNavigate();
 
     const onSubmit = handleSubmit((data: FormData) => {
@@ -31,14 +31,9 @@ export function RegisterForm() {
             })
             .then((data) => {
                 console.log("Success:", data);
+                reset();
                 toast.success('Registration have been successful - you can login now');
-                const offcanvas = document.getElementById("offcanvasNavbarRegister");
-                if (offcanvas) {
-                    const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvas);
-                    if (bsOffcanvas) {
-                        bsOffcanvas.hide();
-                    }
-                }
+                closeBsOffcanvas();
                 navigate("/");
             })
             .catch((error) => {
@@ -70,8 +65,8 @@ export function RegisterForm() {
             </div>
             <form onSubmit={onSubmit} className="container mt-3">
                 <div className="mb-3">
-                    <label htmlFor="inputUserName" className="form-label">Username</label>
-                    <input type="username" className="form-control" id="inputUserName" aria-describedby="userNameHelp" {...register("username", { required: "Username is required" })} />
+                    <label htmlFor="registerUserName" className="form-label">Username</label>
+                    <input type="username" className="form-control" id="registerUserName" aria-describedby="userNameHelp" {...register("username", { required: "Username is required" })} />
                 </div>
                 <div className="mb-3">
                     <label htmlFor="inputEmail" className="form-label">Email</label>
@@ -79,8 +74,8 @@ export function RegisterForm() {
                     {errors.email && <p>{errors.email.message}</p>}
                 </div>
                 <div className="mb-3">
-                    <label htmlFor="inputPassword" className="form-label">Password</label>
-                    <input type="password" className="form-control" id="inputPassword" {...register("password", { required: "Password is required" })} />
+                    <label htmlFor="registerPassword" className="form-label">Password</label>
+                    <input type="password" className="form-control" id="registerPassword" {...register("password", { required: "Password is required" })} />
                 </div>
                 <button type="submit" className="btn btn-primary">Submit</button>
             </form>

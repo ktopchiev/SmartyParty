@@ -4,6 +4,8 @@ import { RegisterForm } from "./RegisterForm";
 import { useAppDispatch, useAppSelector } from "../services/store";
 import { setLogOut } from "../services/user/userSlice";
 import SignalRService from "../services/signalR/SignalRService";
+import { closeBsOffcanvas } from "../util/utility";
+import { toast } from "react-toastify";
 
 export default function Header() {
 
@@ -14,52 +16,72 @@ export default function Header() {
     const handleLogout = () => {
         dispatch(setLogOut());
         SignalRService.stopUserRoomConnection();
+        toast.success("User logged out.")
+        closeBsOffcanvas();
         navigate("/");
     }
 
     return (
-
         <>
             <nav className="navbar bg-body-secondary" style={{ zIndex: 1000 }}>
                 <div className="container-fluid d-flex justify-content-between">
                     <div>
                         <NavLink to="/" className="navbar-brand">SmartyParty</NavLink>
+
+                        {/* Button for developer purposes */}
+                        <button type="button" className="btn btn-sm btn-warning" onClick={() =>
+                            console.log({
+                                state: SignalRService.getSignalRConnection()?.state,
+                                id: SignalRService.getSignalRConnection()?.connectionId
+                            })
+                        }>
+                            Check connection
+                        </button>
+
                     </div>
+
+                    {/* Login and Register offcanvas */}
                     {!loggedIn ? (
+
                         <div>
-                            <button className="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbarLogin" aria-controls="offcanvasNavbarLogin" aria-label="Toggle navigation">
+                            <button className="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasLogin" aria-controls="offcanvasLogin" aria-label="Toggle navigation">
                                 Login
                             </button>
-                            <button className="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbarRegister" aria-controls="offcanvasNavbarRegister" aria-label="Toggle navigation">
-                                Register
-                            </button>
 
-                            <div className="offcanvas offcanvas-end" tabIndex={-1} id="offcanvasNavbarLogin" aria-labelledby="offcanvasNavbarLoginLabel">
+                            <div className="offcanvas offcanvas-end" data-bs-backdrop="static" tabIndex={-1} id="offcanvasLogin" aria-labelledby="offcanvasLoginLabel">
                                 <div className="offcanvas-header">
-                                    <h5 className="offcanvas-title" id="offcanvasNavbarLoginLabel">Login</h5>
+                                    <h5 className="offcanvas-title" id="offcanvasLoginLabel">Login</h5>
                                     <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                                 </div>
                                 <div className="offcanvas-body">
                                     <LoginForm />
                                 </div>
                             </div>
-                            <div className="offcanvas offcanvas-end" tabIndex={-1} id="offcanvasNavbarRegister" aria-labelledby="offcanvasNavbarRegisterLabel">
+
+                            <button className="btn" type="button" data-bs-backdrop="static" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRegister" aria-controls="offcanvasRegister" aria-label="Toggle navigation">
+                                Register
+                            </button>
+
+                            <div className="offcanvas offcanvas-end" tabIndex={-1} id="offcanvasRegister" aria-labelledby="offcanvasRegisterLabel">
                                 <div className="offcanvas-header">
-                                    <h5 className="offcanvas-title" id="offcanvasNavbarRegisterLabel">Register</h5>
+                                    <h5 className="offcanvas-title" id="offcanvasRegisterLabel">Register</h5>
                                     <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                                 </div>
                                 <div className="offcanvas-body">
                                     <RegisterForm />
                                 </div>
                             </div>
+
                         </div>) : (
+
+                        // Logged user menu
                         <div>
-                            <button className="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbarUser" aria-controls="offcanvasNavbarUser" aria-label="Toggle navigation">
+                            <button className="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUser" aria-controls="offcanvasUser" aria-label="Toggle navigation">
                                 {user?.username}
                             </button>
-                            <div className="offcanvas offcanvas-end" tabIndex={-1} id="offcanvasNavbarUser" aria-labelledby="offcanvasNavbarUserLabel">
+                            <div className="offcanvas offcanvas-end" tabIndex={-1} id="offcanvasUser" aria-labelledby="offcanvasUserLabel">
                                 <div className="offcanvas-header">
-                                    <h5 className="offcanvas-title" id="offcanvasNavbarUserLabel">{user?.email}</h5>
+                                    <h5 className="offcanvas-title" id="offcanvasUserLabel">{user?.email}</h5>
                                     <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                                 </div>
                                 <div className="offcanvas-body">
@@ -71,6 +93,7 @@ export default function Header() {
                             </div>
                         </div>
                     )}
+
                 </div>
             </nav >
         </>
