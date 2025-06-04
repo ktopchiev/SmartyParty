@@ -1,3 +1,10 @@
+export type Message = {
+    id: string;
+    roomId: string;
+    from: string;
+    content: string;
+}
+
 export default interface Room {
     id: string;
     name: string;
@@ -5,4 +12,5 @@ export default interface Room {
     topic: string;
     status: string; // "Open" | "Locked"
     players: string[];
+    messages: Message[];
 }

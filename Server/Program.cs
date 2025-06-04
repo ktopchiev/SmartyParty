@@ -42,7 +42,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<AIQuestionService>();
 builder.Services.AddScoped<TokenService>();
-builder.Services.AddScoped<UserConnectionService>();
+builder.Services.AddSingleton<UserConnectionService>();
 
 builder.Services.AddDbContext<SmartyPartyDbContext>(options =>
 

@@ -21,6 +21,9 @@ export const rtkQueryErrorLogger: Middleware =
                 case 404:
                     toast.warning(errorPayload.data.message || 'Not Found');
                     break;
+                case 401:
+                    toast.error(errorPayload.data.message || 'Unathorized');
+                    break;
                 case 400:
                     toast.error(errorPayload.data.message || 'Bad Request');
                     break;

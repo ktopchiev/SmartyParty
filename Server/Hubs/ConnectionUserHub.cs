@@ -25,12 +25,23 @@ public class ConnectionUserHub : Hub
 
     public async Task SendAnswer(AnswerDto answer)
     {
-        if (string.IsNullOrWhiteSpace(answer.From) || string.IsNullOrWhiteSpace(answer.To) || string.IsNullOrWhiteSpace(answer.Question) || string.IsNullOrWhiteSpace(answer.Answer))
+        if (string.IsNullOrWhiteSpace(answer.From) || string.IsNullOrWhiteSpace(answer.Question) || string.IsNullOrWhiteSpace(answer.Answer))
         {
             throw new HubException("Invalid answer");
         }
 
         await Clients.Group(answer.RoomId).SendAsync("ReceiveAnswer", Context.ConnectionId, answer);
+    }
+
+    public async Task SendMessage(MessageRequest messageRequest)
+    {
+        if (string.IsNullOrWhiteSpace(messageRequest.RoomId) || string.IsNullOrWhiteSpace(messageRequest.From) || string.IsNullOrWhiteSpace(messageRequest.Content))
+        {
+            throw new HubException("Invalid message");
+        }
+
+        var message = _userConnectionService.AddMessage(messageRequest.ToMessage());
+        await Clients.Group(messageRequest.RoomId).SendAsync("ReceiveMessage", message);
     }
 
     public async Task CreateRoom(string username, string roomName, string topic)
@@ -60,48 +71,38 @@ public class ConnectionUserHub : Hub
         await Clients.Caller.SendAsync("RoomCreated", newRoom.ToRoomResponse());
     }
 
-    public async Task JoinRoom(string roomId, PlayerDto player)
+    public async Task JoinRoom(string roomId, string username)
     {
-        if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(player.Username))
+        if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(username))
         {
             throw new HubException("Invalid room ID or username");
         }
 
-        _userConnectionService.AddPlayerToRoom(roomId, player.Username, Context.ConnectionId);
+        _userConnectionService.AddPlayerToRoom(roomId, username, Context.ConnectionId);
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-        await Clients.Group(roomId).SendAsync("PlayerJoined", player);
+        await Clients.Group(roomId).SendAsync("PlayerJoined", username);
     }
 
-    public async Task LeaveRoom(string roomId)
+
+    public async Task LeaveRoom(string roomId, string playerName)
     {
         if (string.IsNullOrWhiteSpace(roomId))
         {
             throw new HubException("Invalid room ID");
         }
 
-        _userConnectionService.RemovePlayerFromRoom(roomId, Context.ConnectionId);
+        _userConnectionService.RemovePlayerFromRoom(roomId, playerName);
 
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
-        await Clients.Group(roomId).SendAsync("PlayerLeft", Context.ConnectionId);
-    }
-
-    public async Task GetPlayersInRoom(string roomId)
-    {
-        if (string.IsNullOrWhiteSpace(roomId))
-        {
-            throw new HubException("Invalid room ID");
-        }
-
-        var players = _userConnectionService.GetPlayersInRoom(roomId);
-        await Clients.Caller.SendAsync("ReceivePlayersInRoom", players);
+        await Clients.Group(roomId).SendAsync("PlayerLeft", playerName);
     }
 
     public async Task GetRooms()
     {
         var rooms = _userConnectionService.GetRooms();
-        var roomResponses = rooms.Select(r => r.ToRoomResponse()).ToList();
-        await Clients.Caller.SendAsync("ReceiveRooms", roomResponses);
+        var roomListResponse = rooms.Select(r => r.ToRoomResponse()).ToList();
+        await Clients.All.SendAsync("ReceiveRoomList", roomListResponse);
     }
 
     public async Task GetRoomById(string roomId)

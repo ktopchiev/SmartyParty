@@ -1,10 +1,10 @@
 import { useForm } from "react-hook-form";
 import { useAppSelector } from "../services/store";
-import { useEffect, useState } from "react";
-import type Room from "../models/Room";
+import { useEffect } from "react";
 import SignalRService from "../services/signalR/SignalRService";
 import { HubConnectionState } from "@microsoft/signalr";
 import { useNavigate } from "react-router";
+import type Room from "../models/Room";
 
 type FormData = {
     roomName: string;
@@ -14,8 +14,8 @@ type FormData = {
 export default function HomePage() {
     const { loggedIn, user } = useAppSelector((state) => state.user);
     const { register, handleSubmit } = useForm<FormData>();
-    const [rooms, setRooms] = useState<Room[] | null>(null);
     const navigate = useNavigate();
+    const { roomsList } = useAppSelector((state) => state.room);
 
     const topics = [
         { id: 1, name: "General Knowledge" },
@@ -30,10 +30,18 @@ export default function HomePage() {
         { id: 10, name: "Technology" }
     ];
 
+    const handleJoinRoom = async (roomId: string) => {
+        if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
+            await SignalRService.startUserRoomConnection();
+        }
+
+        await SignalRService.joinRoom(roomId, user?.username!);
+        navigate(`/quizroom/${roomId}`);
+    }
+
     const handleCreateRoom = async (data: FormData) => {
         event?.preventDefault();
-        console.log(data);
-        if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
+        if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
             await SignalRService.startUserRoomConnection();
         }
         await SignalRService.createRoom(user!.username, data.roomName, data.radio);
@@ -41,39 +49,21 @@ export default function HomePage() {
 
     useEffect(() => {
 
-        const waitForConnectionAndFetchRooms = async () => {
-            const connection = SignalRService.getSignalRConnection();
-
-            if (!connection) {
-                console.error("SignalR connection not initialized.");
-                return;
+        const fetchAndSetRooms = async () => {
+            if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
+                await SignalRService.startUserRoomConnection();
             }
 
-            // // Wait until connection is connected
-            // const waitUntilConnected = async () => {
-            //     while (connection.state !== HubConnectionState.Connected) {
-            //         console.log("Waiting for SignalR connection...");
-            //         await new Promise(res => setTimeout(res, 100));
-            //     }
-            // };
+            await SignalRService.getRooms();
+        }
 
-            // await waitUntilConnected();
-
-            if (connection.state === HubConnectionState.Connected) {
-                const rooms = await SignalRService.getRooms();
-                setRooms(rooms);
-                console.log("Rooms:", rooms);
-            }
-        };
-
-        waitForConnectionAndFetchRooms();
+        fetchAndSetRooms();
     }, []);
 
     useEffect(() => {
         SignalRService.setOnRoomCreatedCallback((room) => {
             console.log("Room created callback:", room);
-            setRooms((prevRooms) => (prevRooms ? [...prevRooms, room] : [room]));
-            navigate(`/room/${room.id}`);
+            navigate(`/quizroom/${room.id}`);
         });
     }, [navigate]);
 
@@ -82,35 +72,41 @@ export default function HomePage() {
             <div className="row">
                 <div className="col-6">
                     <h2 className="text-center">Rooms</h2>
-                    {!loggedIn ?
-                        (<h5 className="text-center">Please log in to create or join rooms.</h5>)
-                        :
-                        (<table className="table table-striped table-hover table-sm">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Id</th>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Creator</th>
-                                    <th scope="col">Topic</th>
-                                    <th scope="col">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {rooms?.map((room) => (
-                                    <tr key={room.id}>
-                                        <th scope="row">{room.id}</th>
-                                        <td>{room.name}</td>
-                                        <td>{room.creator}</td>
-                                        <td>{room.topic}</td>
-                                        <td>{room.status}</td>
-                                        <td>
-                                            <button className={`btn btn-primary ${loggedIn ?? 'disabled'}`} type="button">Join</button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>)}
-                </div>
+                    {!loggedIn &&
+                        (<h5 className="text-center mark">Please log in to create or join rooms.</h5>)
+                    }
+                    <table className="table table-striped table-hover table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">Id</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Creator</th>
+                                <th scope="col">Topic</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {roomsList?.map((room: Room) => (
+                                <tr key={room.id}>
+                                    <th scope="row">{room.id}</th>
+                                    <td>{room.name}</td>
+                                    <td>{room.creator}</td>
+                                    <td>{room.topic}</td>
+                                    <td>{room.status}</td>
+                                    <td>
+                                        <button
+                                            className={`btn btn-warning ${!loggedIn || room.players.length === 2 ? "disabled" : ""}`}
+                                            type="button"
+                                            onClick={() => handleJoinRoom(room.id)}
+                                        >
+                                            Join
+                                        </button >
+                                    </td >
+                                </tr >
+                            ))}
+                        </tbody >
+                    </table >
+                </div >
                 {loggedIn && (
                     <div className="col-6">
                         <form onSubmit={handleSubmit(handleCreateRoom)} className="container mt-3">
@@ -133,13 +129,12 @@ export default function HomePage() {
                             </div>
 
                             <button type="submit" className="btn btn-warning">Create New Room</button>
-                            <button type="button" className="btn btn-warning" onClick={() => console.log(SignalRService.getSignalRConnection()?.state)}>Check connection</button>
 
                         </form>
                     </div>
                 )}
 
-            </div>
-        </div>
+            </div >
+        </div >
     )
 }

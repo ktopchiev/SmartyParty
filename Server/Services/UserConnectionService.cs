@@ -40,7 +40,8 @@ namespace Server.Services
                 Id = Guid.NewGuid(),
                 Name = roomName,
                 Topic = topic,
-                Players = new List<Player>()
+                Players = new List<Player>(),
+                Messages = new List<Message>()
             };
 
             _Rooms.Add(room);
@@ -121,8 +122,22 @@ namespace Server.Services
                 if (player != null)
                 {
                     room.Players.Remove(player);
+                    if (room.Players.Count == 0) ClearRoom(room.Name);
                 }
             }
+        }
+
+        public Message AddMessage(Message message)
+        {
+            if (string.IsNullOrEmpty(message.RoomId) || string.IsNullOrEmpty(message.From) || string.IsNullOrEmpty(message.Content)) return null!;
+
+            var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == message.RoomId);
+
+            if (room == null) return null!;
+
+            room.Messages.Add(message);
+
+            return message;
         }
 
         public void ClearAll()
