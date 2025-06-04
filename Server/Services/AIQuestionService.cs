@@ -15,7 +15,7 @@ public class AIQuestionService
         _httpClient = new HttpClient();
     }
 
-    public async Task<JObject[]> GenerateQuestionsAsync(string topic, string language = "en")
+    public async Task<JObject[]> GenerateQuestionsAsync(string topic, string language = "english")
     {
         var prompt = $$"""
         Generate 5 multiple-choice quiz questions on the topic: "{{topic}}".

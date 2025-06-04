@@ -87,7 +87,7 @@ class SignalRService {
         this.onRoomCreatedCallback = callback;
     }
 
-    public async createRoom(username: string, roomName: string, topic: string) {
+    public async createRoom(username: string, roomName: string, topic: string, language: string) {
         if (!this.signalRConnection) {
             console.error("SignalR connection is not established.");
             return;
@@ -99,7 +99,7 @@ class SignalRService {
                 console.error("Room name and topic are required to create a room.");
                 return;
             }
-            let roomResponse = await this.signalRConnection?.invoke("CreateRoom", username, roomName, topic);
+            let roomResponse = await this.signalRConnection?.invoke("CreateRoom", username, roomName, topic, language);
             console.log("Room created successfully:", roomResponse);
             return roomResponse;
         } catch (error) {

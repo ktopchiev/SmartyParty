@@ -44,7 +44,7 @@ public class ConnectionUserHub : Hub
         await Clients.Group(messageRequest.RoomId).SendAsync("ReceiveMessage", message);
     }
 
-    public async Task CreateRoom(string username, string roomName, string topic)
+    public async Task CreateRoom(string username, string roomName, string topic, string language)
     {
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(topic))
         {
@@ -53,7 +53,7 @@ public class ConnectionUserHub : Hub
 
         _userConnectionService.AddPlayer(username, Context.ConnectionId);
 
-        var newRoom = _userConnectionService.AddRoom(roomName, topic, username, Context.ConnectionId);
+        var newRoom = _userConnectionService.AddRoom(roomName, topic, username, language, Context.ConnectionId);
 
         if (newRoom == null)
         {

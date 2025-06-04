@@ -8,7 +8,8 @@ import type Room from "../models/Room";
 
 type FormData = {
     roomName: string;
-    radio: string;
+    topic: string;
+    language: string;
 }
 
 export default function HomePage() {
@@ -27,8 +28,13 @@ export default function HomePage() {
         { id: 7, name: "Science" },
         { id: 8, name: "Geography" },
         { id: 9, name: "Sports" },
-        { id: 10, name: "Technology" }
+        { id: 10, name: "Technology" },
     ];
+
+    const languages = [
+        { id: 1, language: "Български" },
+        { id: 2, language: "English" },
+    ]
 
     const handleJoinRoom = async (roomId: string) => {
         if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
@@ -44,7 +50,7 @@ export default function HomePage() {
         if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
             await SignalRService.startUserRoomConnection();
         }
-        await SignalRService.createRoom(user!.username, data.roomName, data.radio);
+        await SignalRService.createRoom(user!.username, data.roomName, data.topic, data.language.toLowerCase());
     }
 
     useEffect(() => {
@@ -107,25 +113,37 @@ export default function HomePage() {
                         </tbody >
                     </table >
                 </div >
+
+                {/* Form for creating a room */}
                 {loggedIn && (
                     <div className="col-6">
-                        <form onSubmit={handleSubmit(handleCreateRoom)} className="container mt-3">
+                        <form onSubmit={handleSubmit(handleCreateRoom)} className="container d-flex flex-column mt-3">
 
                             <div className="mb-3">
                                 <label htmlFor="roomName" className="form-label">Name</label>
                                 <input type="text" className="form-control" id="roomName" {...register("roomName")} />
                             </div>
 
-                            <div className="mb-3">
-                                <h5>Topic</h5>
-                                {topics.map((topic) => (
-                                    <div className="form-check" key={topic.id}>
-                                        <input className="form-check-input" {...register("radio")} type="radio" id={`radioDefault${topic.id}`} value={topic.name} />
-                                        <label className="form-check-label" htmlFor={`radioDefault${topic.id}`}>
-                                            {topic.name}
-                                        </label>
-                                    </div>
-                                ))}
+                            <div className="container d-flex mb-3 justify-content-center">
+                                <div className="container d-flex flex-column mb-3 justify-content-center">
+                                    <h5>Topic</h5>
+                                    {topics.map((topic) => (
+                                        <div className="form-check" key={topic.id}>
+                                            <input className="form-check-input" {...register("topic")} type="radio" id={`radioDefault${topic.id}`} value={topic.name} />
+                                            <label className="form-check-label" htmlFor={`radioDefault${topic.id}`}>
+                                                {topic.name}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="container d-flex flex-row mb-3 justify-content-center align-items-start">
+                                    <select className="form-select form-select-sm" aria-label="Select language" {...register("language")}>
+                                        <option selected>Select language</option>
+                                        {languages.map((lng) =>
+                                            <option value={lng.id}>{lng.language}</option>
+                                        )}
+                                    </select>
+                                </div>
                             </div>
 
                             <button type="submit" className="btn btn-warning">Create New Room</button>

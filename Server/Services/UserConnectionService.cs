@@ -26,7 +26,7 @@ namespace Server.Services
             }
         }
 
-        public Room AddRoom(string roomName, string topic, string playerName, string connectionId)
+        public Room AddRoom(string roomName, string topic, string playerName, string language, string connectionId)
         {
 
             var existingRoom = _Rooms.FirstOrDefault(r => r.Name == roomName);
@@ -40,6 +40,7 @@ namespace Server.Services
                 Id = Guid.NewGuid(),
                 Name = roomName,
                 Topic = topic,
+                Language = language,
                 Players = new List<Player>(),
                 Messages = new List<Message>()
             };
