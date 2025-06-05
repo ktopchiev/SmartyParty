@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { rtkQueryErrorLogger } from "./middleware/rtkQueryErrorLogger";
 import { userApi } from "./user/userApi";
 import { userSlice } from "./user/userSlice";
-import roomsSlice from "./signalR/roomsSlice";
+import roomsSlice from "./room/roomsSlice";
 
 export const store = configureStore({
     reducer: {

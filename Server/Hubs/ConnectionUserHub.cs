@@ -5,10 +5,12 @@ using Server.Services;
 public class ConnectionUserHub : Hub
 {
     private readonly UserConnectionService _userConnectionService;
+    private readonly AIQuestionService _aiQuestionService;
 
-    public ConnectionUserHub(UserConnectionService userConnectionService)
+    public ConnectionUserHub(UserConnectionService userConnectionService, AIQuestionService aIQuestionService)
     {
         _userConnectionService = userConnectionService;
+        _aiQuestionService = aIQuestionService;
     }
 
     public override async Task OnConnectedAsync()
@@ -25,10 +27,13 @@ public class ConnectionUserHub : Hub
 
     public async Task SendAnswer(AnswerDto answer)
     {
-        if (string.IsNullOrWhiteSpace(answer.From) || string.IsNullOrWhiteSpace(answer.Question) || string.IsNullOrWhiteSpace(answer.Answer))
+        if (string.IsNullOrWhiteSpace(answer.From) || string.IsNullOrWhiteSpace(answer.Question) || string.IsNullOrWhiteSpace(answer.AnswerContent))
         {
             throw new HubException("Invalid answer");
         }
+
+        if (answer.IsCorrect)
+            _userConnectionService.AddPointsToPlayer(answer.From);
 
         await Clients.Group(answer.RoomId).SendAsync("ReceiveAnswer", Context.ConnectionId, answer);
     }
@@ -59,6 +64,15 @@ public class ConnectionUserHub : Hub
         {
             throw new HubException("Failed to create room");
         }
+
+        var questions = await _aiQuestionService.GenerateQuestionsAsync(topic, language);
+
+        if (questions == null)
+        {
+            throw new HubException("Failed to generate questions");
+        }
+        
+        newRoom.Questions = questions;
 
         var roomId = newRoom.Id.ToString();
 

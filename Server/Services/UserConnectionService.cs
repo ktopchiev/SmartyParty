@@ -141,6 +141,15 @@ namespace Server.Services
             return message;
         }
 
+        public void AddPointsToPlayer(string playerUserName)
+        {
+            var player = _Players.Find(p => p.Username == playerUserName);
+
+            if (player == null) return;
+
+            player.Points += 10;
+        }
+
         public void ClearAll()
         {
             _Rooms.Clear();

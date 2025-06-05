@@ -1,7 +1,7 @@
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from "@microsoft/signalr";
 import { store } from "../store";
 import type Room from "../../models/Room";
-import { addMessageToRoom, addPlayer, addRoomToList, removePlayer, resetRoom, setRoom, setRoomsList } from "./roomsSlice";
+import { addMessageToRoom, addPlayer, addRoomToList, removePlayer, resetRoom, setRoom, setRoomsList } from "../room/roomsSlice";
 import type { MessageDto } from "../../models/MessageDto";
 
 class SignalRService {

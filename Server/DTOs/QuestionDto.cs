@@ -4,20 +4,22 @@ namespace Server.DTOs
 {
     public class QuestionDto
     {
-        public string Question { get; set; }
-        public string CorrectAnswer { get; set; }
-        public List<string> IncorrectAnswers { get; set; } = new List<string>();
+        public int Id { get; set; }
+        public string QuestionContent { get; set; } = string.Empty;
+        public AnswerDto CorrectAnswer { get; set; }
+        public List<AnswerDto> IncorrectAnswers { get; set; } = new List<AnswerDto>();
     }
 
     public static class QuestionDtoExtensions
     {
-        public static QuestionDto FromJson(this JObject json)
+        public static QuestionDto ToQuestionDto(this JObject json)
         {
             return new QuestionDto
             {
-                Question = json["question"]?.ToString(),
-                CorrectAnswer = json["correctAnswer"]?.ToString(),
-                IncorrectAnswers = json["incorrectAnswers"]?.ToObject<List<string>>() ?? new List<string>()
+                Id = (int)json["id"],
+                QuestionContent = json["question"]?.ToString(),
+                CorrectAnswer = json["correctAnswer"].ToObject<AnswerDto>(),
+                IncorrectAnswers = json["incorrectAnswers"]?.ToObject<List<AnswerDto>>() ?? new List<AnswerDto>()
             };
         }
     }

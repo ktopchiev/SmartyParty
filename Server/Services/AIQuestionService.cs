@@ -1,11 +1,12 @@
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Server.Models;
 
 public class AIQuestionService
 {
     private readonly HttpClient _httpClient;
-    private readonly string _apiKey;
+    private readonly string? _apiKey;
     private readonly string _model;
 
     public AIQuestionService(IConfiguration config)
@@ -15,7 +16,7 @@ public class AIQuestionService
         _httpClient = new HttpClient();
     }
 
-    public async Task<JObject[]> GenerateQuestionsAsync(string topic, string language = "english")
+    public async Task<List<Question>> GenerateQuestionsAsync(string topic, string language = "english")
     {
         var prompt = $$"""
         Generate 5 multiple-choice quiz questions on the topic: "{{topic}}".
@@ -23,9 +24,10 @@ public class AIQuestionService
         Format the response as a JSON array:
         [
           {
+            "id": "...",
             "question": "...",
-            "correctAnswer": "...",
-            "incorrectAnswers": ["...", "...", "..."]
+            "correctOption": {"id":"...", "option":"..."},
+            "incorrectOptions": [{"id":"...", "option":"..."}, {"id":"...", "option":"..."}, {"id":"...", "option":"..."}]
           },
           ...
         ]
@@ -81,8 +83,8 @@ public class AIQuestionService
             throw new Exception("Empty content in OpenAI API response.");
         }
 
-        var jsonArrResult = JsonConvert.DeserializeObject<JObject[]>(jsonContent);
+        var questionListResult = JsonConvert.DeserializeObject<List<Question>>(jsonContent);
 
-        return jsonArrResult;
+        return questionListResult!;
     }
 }

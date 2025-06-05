@@ -11,6 +11,7 @@ namespace Server.DTOs
         public string Status { get; set; }
         public List<string> Players { get; set; } = new List<string>();
         public List<MessageResponse> Messages { get; set; } = new List<MessageResponse>();
+        public List<QuestionDto> Questions { get; set; } = new List<QuestionDto>();
     }
 
     public static class RoomResponseExtensions
@@ -25,7 +26,8 @@ namespace Server.DTOs
                 Topic = room.Topic,
                 Status = "Open", // Assuming the status is always "Active" for now
                 Players = room.Players.Select(p => p.Username).ToList(),
-                Messages = room.Messages.Select(m => m.ToMessageResponse()).ToList()
+                Messages = room.Messages.Select(m => m.ToMessageResponse()).ToList(),
+                Questions = room.Questions.Select(q => q.ToQuestionDto()).ToList()
             };
         }
     }

@@ -11,7 +11,6 @@ type Option = {
     isCorrect: boolean;
 };
 
-const questionIndex = 1; // This should be dynamic based on the current question
 const totalQuestions = 10; // This should be dynamic based on the total number of questions
 const question = "What is the capital of France?"; // This should be dynamic based on the current question
 const options: Option[] = [
@@ -24,6 +23,7 @@ const timer = 30; // This should be dynamic based on the game settings
 
 const QuizRoomPage: React.FC = () => {
 
+    const [questionIndex, setQuestionIndex] = useState<number>(1);
     const [selected, setSelected] = useState<number | null>(null);
     const [showAnswer, setShowAnswer] = useState(false);
     const [countdown, setCountdown] = useState(timer);
@@ -79,6 +79,7 @@ const QuizRoomPage: React.FC = () => {
         setSelected(null);
         setShowAnswer(false);
         // Logic to load the next question
+        setQuestionIndex((prev) => prev + 1);
     };
 
     const onHintClick = () => {

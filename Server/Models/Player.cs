@@ -11,5 +11,6 @@ namespace Server.Models
         public required string Username { get; set; }
         /// <value>string Property <c>ConnectionId</c> </value>
         public required string ConnectionId { get; set; }
+        public int Points { get; set; }
     }
 }
