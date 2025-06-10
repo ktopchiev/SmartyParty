@@ -9,7 +9,7 @@ import { useAppDispatch } from "../services/store";
 import SignalRService from "../services/signalR/SignalRService";
 import { useState } from "react";
 import { Eye, EyeOff } from 'lucide-react';
-import { closeBsOffcanvas } from "../util/utility";
+import { closeBsOffcanvas } from "../util/utilities";
 
 type FormData = {
     username: string;

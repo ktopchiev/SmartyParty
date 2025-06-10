@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { User } from "../../models/User";
 import type { LoginRequest } from "../../models/LoginRequest";
 import type RegisterRequest from "../../models/RegisterRequest";
-import { getJwtTokenFromLocalStorage } from "../../util/utility";
+import { getJwtTokenFromLocalStorage } from "../../util/utilities";
 
 export const userApi = createApi({
     reducerPath: "userApi",

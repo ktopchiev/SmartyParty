@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { User } from "../../models/User";
 
 interface InitialState {
@@ -9,7 +9,7 @@ interface InitialState {
 const init = () => {
     const initialState: InitialState = {
         user: null,
-        loggedIn: false
+        loggedIn: false,
     }
 
     return initialState;
@@ -19,7 +19,7 @@ export const userSlice = createSlice({
     name: "user",
     initialState: init(),
     reducers: {
-        setCurrentUser: (state, action) => {
+        setCurrentUser: (state, action: PayloadAction<User>) => {
             state.user = action.payload;
             state.loggedIn = true;
         },
@@ -32,4 +32,4 @@ export const userSlice = createSlice({
     },
 });
 
-export const { setCurrentUser, setLogOut } = userSlice.actions
+export const { setCurrentUser, setLogOut, } = userSlice.actions

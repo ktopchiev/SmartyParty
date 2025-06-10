@@ -1,5 +1,3 @@
-using Server.Models;
-
 namespace Server.DTOs
 {
     public class MessageResponse

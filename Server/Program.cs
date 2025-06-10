@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Server.Controllers;
 using Server.Data;
 using Server.Endpoints;
+using Server.Middleware;
 using Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -72,6 +72,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -80,9 +82,11 @@ if (app.Environment.IsDevelopment())
         c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
     });
 }
-
-// app.UseDefaultFiles();
-// app.UseStaticFiles();
+else
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+}
 
 app.UseCors(options =>
 {
@@ -97,13 +101,20 @@ app.UseAuthorization();
 
 
 app.MapUserEndpoints();
-app.MapQuestionEndpoints();
 app.MapHub<ConnectionUserHub>("/hubs/connectionuser");
 
 var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<SmartyPartyDbContext>();
+var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-await context.Database.MigrateAsync();
-await DbInitializer.Initialize(context);
+try
+{
+    await context.Database.MigrateAsync();
+    await DbInitializer.Initialize(context);
+}
+catch (Exception ex)
+{
+    logger.LogError(ex, "A problem occured during migration");
+}
 
 app.Run();

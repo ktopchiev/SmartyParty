@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { toast } from "react-toastify";
-import { closeBsOffcanvas } from "../util/utility";
+import { closeBsOffcanvas } from "../util/utilities";
 
 type FormData = {
     username: string;

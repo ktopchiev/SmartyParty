@@ -1,4 +1,5 @@
 using Server.DTOs;
+using Server.DTOs.Responses;
 
 namespace Server.Models
 {
@@ -6,20 +7,18 @@ namespace Server.Models
     {
         public int Id { get; set; }
         public string QuestionContent { get; set; } = string.Empty;
-        public Answer CorrectAnswer { get; set; } = new();
-        public List<Answer> IncorrectAnswers { get; set; } = new();
+        public List<Option> Options { get; set; } = new();
     }
 
-    public static class QuestionExtensions
+    public static class QuestionResponseExtensions
     {
-        public static QuestionDto ToQuestionDto(this Question question)
+        public static QuestionResponse ToQuestionResponse(this Question question)
         {
-            return new QuestionDto
+            return new QuestionResponse
             {
                 Id = question.Id,
                 QuestionContent = question.QuestionContent,
-                CorrectAnswer = question.CorrectAnswer.ToAnswerDto(),
-                IncorrectAnswers = question.IncorrectAnswers.Select(i => i.ToAnswerDto()).ToList()
+                Options = question.Options.Select(io => io.ToOptionResponse()).ToList()
             };
         }
     }

@@ -4,7 +4,7 @@ import { RegisterForm } from "./RegisterForm";
 import { useAppDispatch, useAppSelector } from "../services/store";
 import { setLogOut } from "../services/user/userSlice";
 import SignalRService from "../services/signalR/SignalRService";
-import { closeBsOffcanvas } from "../util/utility";
+import { closeBsOffcanvas } from "../util/utilities";
 import { toast } from "react-toastify";
 
 export default function Header() {

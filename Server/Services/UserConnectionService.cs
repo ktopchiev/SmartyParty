@@ -26,7 +26,7 @@ namespace Server.Services
             }
         }
 
-        public Room AddRoom(string roomName, string topic, string playerName, string language, string connectionId)
+        public Room AddRoom(string roomName, string topic, string playerName, string language, string number, string difficulty, string connectionId)
         {
 
             var existingRoom = _Rooms.FirstOrDefault(r => r.Name == roomName);
@@ -41,6 +41,8 @@ namespace Server.Services
                 Name = roomName,
                 Topic = topic,
                 Language = language,
+                Number = number,
+                Difficulty = difficulty,
                 Players = new List<Player>(),
                 Messages = new List<Message>()
             };
@@ -56,9 +58,9 @@ namespace Server.Services
             return room;
         }
 
-        public void RemoveRoom(string roomName)
+        public void RemoveRoom(string roomId)
         {
-            var room = _Rooms.FirstOrDefault(r => r.Name == roomName);
+            var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
             if (room != null)
             {
                 _Rooms.Remove(room);
@@ -90,27 +92,54 @@ namespace Server.Services
             return _Players.FirstOrDefault(p => p.Username == username);
         }
 
-        public List<Player> GetPlayersInRoom(string roomName)
+        public List<Player> GetPlayersInRoom(string roomId)
         {
-            var room = _Rooms.FirstOrDefault(r => r.Name == roomName);
+            var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
             return room?.Players ?? new List<Player>();
         }
 
-        public void AddPlayerToRoom(string roomId, string playerUserName, string connectionId)
+        public Player GetPlayerInRoom(string roomId, string player)
         {
+            var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
+            return room.Players.FirstOrDefault(p => p.Username == player);
+        }
+
+        public Player AddPlayerToRoom(string roomId, string playerUserName, string connectionId)
+        {
+            if (_Players.Any(p => p.Username == playerUserName)) return null;
+
+            var existingRoom = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
+
+            if (existingRoom == null) return null;
+
             var player = new Player
             {
                 Username = playerUserName,
-                ConnectionId = connectionId
+                ConnectionId = connectionId,
+                Points = 0,
+                CurrentQuestionIndex = 0
             };
 
             _Players.Add(player);
-            var existingRoom = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
 
-            if (existingRoom != null)
-            {
-                existingRoom.Players.Add(player);
-            }
+            existingRoom.Players.Add(player);
+
+            return player;
+        }
+
+        public void UpdatePlayerInRoom(string roomId, string playerUserName, int questionIndex = -1, int points = 0)
+        {
+            var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
+
+            if (room == null) return;
+
+            var player = room.Players.FirstOrDefault(p => p.Username == playerUserName);
+
+            if (player == null) return;
+
+            if (questionIndex > -1) player.CurrentQuestionIndex = questionIndex;
+
+            if (points > 0) player.Points += points;
         }
 
         public void RemovePlayerFromRoom(string roomId, string playerUserName)
@@ -120,10 +149,11 @@ namespace Server.Services
             if (room != null)
             {
                 var player = room.Players.FirstOrDefault(p => p.Username == playerUserName);
+
                 if (player != null)
                 {
                     room.Players.Remove(player);
-                    if (room.Players.Count == 0) ClearRoom(room.Name);
+                    if (room.Players.Count == 0) _Rooms.Remove(room);
                 }
             }
         }
@@ -139,15 +169,6 @@ namespace Server.Services
             room.Messages.Add(message);
 
             return message;
-        }
-
-        public void AddPointsToPlayer(string playerUserName)
-        {
-            var player = _Players.Find(p => p.Username == playerUserName);
-
-            if (player == null) return;
-
-            player.Points += 10;
         }
 
         public void ClearAll()

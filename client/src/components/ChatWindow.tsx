@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useAppSelector } from "../services/store";
 import SignalRService from "../services/signalR/SignalRService";
 import type { MessageDto } from "../models/MessageDto";
+import { HubConnectionState } from "@microsoft/signalr";
 
 interface Props {
     roomId: string;
@@ -21,6 +22,10 @@ export default function ChatWindow({ roomId }: Props) {
                 from: user?.username!,
                 content: input.trim(),
             };
+            if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
+
+                await SignalRService.startUserRoomConnection();
+            }
             await SignalRService.sendMessage(messageDto);
             setInput("");
         }
@@ -39,10 +44,10 @@ export default function ChatWindow({ roomId }: Props) {
                 {room?.messages?.map((msg) => (
                     <div
                         className={`container d-flex mb-2 ${msg.from === user?.username ? "justify-content-end" : "justify-content-start"}`}
-                        style={{ wordWrap: "break-word" }}
+                        style={{ wordWrap: "break-word", }}
+                        key={msg.id}
                     >
                         <div
-                            key={msg.id}
                             className={`small pb-1 mb-1 px-2 flex-end`}
                             style={{
                                 backgroundColor: msg.from === user?.username ? " #3498db" : " #e5e7e9",

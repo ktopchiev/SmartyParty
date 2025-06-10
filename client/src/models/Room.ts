@@ -1,8 +1,22 @@
+import type { Player } from "./Player";
+
 export type Message = {
     id: string;
     roomId: string;
     from: string;
     content: string;
+}
+
+export type Option = {
+    id: number;
+    content: string;
+    isCorrect: boolean;
+}
+
+export type Question = {
+    id: number;
+    questionContent: string;
+    options: Option[];
 }
 
 export default interface Room {
@@ -12,6 +26,9 @@ export default interface Room {
     topic: string;
     language: string;
     status: string; // "Open" | "Locked"
-    players: string[];
+    numberOfQuestions: number;
+    difficulty: string;
+    players: Player[] | [];
     messages: Message[];
+    questions: Question[];
 }

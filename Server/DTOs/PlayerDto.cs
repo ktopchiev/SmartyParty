@@ -2,6 +2,8 @@ namespace Server.DTOs
 {
     public class PlayerDto
     {
-        public string Username { get; set; } = string.Empty;
+        public required string Username { get; set; }
+        public int Points { get; set; }
+        public int CurrentQuestionIndex { get; set; }
     }
 }

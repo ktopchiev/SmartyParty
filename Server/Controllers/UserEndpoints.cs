@@ -44,7 +44,8 @@ namespace Server.Endpoints
             return Results.Created();
         }
 
-        public static async Task<IResult> LoginUser(LoginDto loginDto, SmartyPartyDbContext dbContext, IConfiguration _conf, TokenService tokenService)
+        public static async Task<IResult> LoginUser(LoginDto loginDto, SmartyPartyDbContext dbContext, IConfiguration _conf, TokenService tokenService,
+         UserConnectionService userConnectionService)
         {
             if (string.IsNullOrWhiteSpace(loginDto.Username) || string.IsNullOrWhiteSpace(loginDto.Password))
             {

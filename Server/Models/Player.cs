@@ -1,3 +1,5 @@
+using Server.DTOs;
+
 namespace Server.Models
 {
     /// <summary>
@@ -12,5 +14,19 @@ namespace Server.Models
         /// <value>string Property <c>ConnectionId</c> </value>
         public required string ConnectionId { get; set; }
         public int Points { get; set; }
+        public int CurrentQuestionIndex { get; set; }
+    }
+
+    public static class PlayerExtension
+    {
+        public static PlayerDto ToPlayerDto(this Player player)
+        {
+            return new PlayerDto
+            {
+                Username = player.Username,
+                Points = player.Points,
+                CurrentQuestionIndex = player.CurrentQuestionIndex,
+            };
+        }
     }
 }

@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.SignalR;
 using Server.DTOs;
+using Server.DTOs.Requests;
+using Server.DTOs.Responses;
+using Server.Models;
 using Server.Services;
 
 public class ConnectionUserHub : Hub
@@ -25,17 +28,17 @@ public class ConnectionUserHub : Hub
         await Clients.Caller.SendAsync("UserDisconnected", Context.ConnectionId);
     }
 
-    public async Task SendAnswer(AnswerDto answer)
+    public async Task SendAnswer(AnswerRequest answer)
     {
-        if (string.IsNullOrWhiteSpace(answer.From) || string.IsNullOrWhiteSpace(answer.Question) || string.IsNullOrWhiteSpace(answer.AnswerContent))
+        if (string.IsNullOrWhiteSpace(answer.From) || string.IsNullOrWhiteSpace(answer.RoomId) || answer.Option == null)
         {
             throw new HubException("Invalid answer");
         }
 
-        if (answer.IsCorrect)
-            _userConnectionService.AddPointsToPlayer(answer.From);
+        if (answer.Option.IsCorrect)
+            _userConnectionService.UpdatePlayerInRoom(answer.RoomId, answer.From, -1, 10);
 
-        await Clients.Group(answer.RoomId).SendAsync("ReceiveAnswer", Context.ConnectionId, answer);
+        await Clients.OthersInGroup(answer.RoomId).SendAsync("ReceiveAnswer", answer.ToAnswerResponse());
     }
 
     public async Task SendMessage(MessageRequest messageRequest)
@@ -49,30 +52,49 @@ public class ConnectionUserHub : Hub
         await Clients.Group(messageRequest.RoomId).SendAsync("ReceiveMessage", message);
     }
 
-    public async Task CreateRoom(string username, string roomName, string topic, string language)
+    public async Task UpdatePlayer(string roomId, PlayerDto player)
     {
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(topic))
+        if (string.IsNullOrEmpty(player.Username))
+        {
+            throw new HubException("Invalid player username");
+        }
+
+        _userConnectionService.UpdatePlayerInRoom(roomId, player.Username, player.CurrentQuestionIndex, player.Points);
+        await Clients.Group(roomId).SendAsync("PlayerUpdated", player);
+    }
+
+    public async Task CreateRoom(RoomRequest roomRequest)
+    {
+        var player = roomRequest.Username;
+        var roomName = roomRequest.RoomName;
+        var topic = roomRequest.Topic;
+        var language = roomRequest.Language;
+        var number = roomRequest.Number;
+        var difficulty = roomRequest.Difficulty;
+
+        if (string.IsNullOrWhiteSpace(player) || string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(topic))
         {
             throw new HubException("Invalid room details");
         }
 
-        _userConnectionService.AddPlayer(username, Context.ConnectionId);
+        _userConnectionService.AddPlayer(player, Context.ConnectionId);
 
-        var newRoom = _userConnectionService.AddRoom(roomName, topic, username, language, Context.ConnectionId);
+        var newRoom = _userConnectionService.AddRoom(roomName, topic, player, language, number, difficulty, Context.ConnectionId);
 
         if (newRoom == null)
         {
             throw new HubException("Failed to create room");
         }
 
-        var questions = await _aiQuestionService.GenerateQuestionsAsync(topic, language);
+        var questions = await _aiQuestionService.GenerateQuestionsAsync(topic, number, difficulty, language);
 
         if (questions == null)
         {
             throw new HubException("Failed to generate questions");
         }
-        
+
         newRoom.Questions = questions;
+        newRoom.Number = questions.Count().ToString();
 
         var roomId = newRoom.Id.ToString();
 
@@ -83,6 +105,7 @@ public class ConnectionUserHub : Hub
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
         await Clients.Caller.SendAsync("RoomCreated", newRoom.ToRoomResponse());
+        await Clients.Others.SendAsync("ReceiveRoom", newRoom.ToRoomResponse());
     }
 
     public async Task JoinRoom(string roomId, string username)
@@ -92,10 +115,15 @@ public class ConnectionUserHub : Hub
             throw new HubException("Invalid room ID or username");
         }
 
-        _userConnectionService.AddPlayerToRoom(roomId, username, Context.ConnectionId);
+        var player = _userConnectionService.AddPlayerToRoom(roomId, username, Context.ConnectionId);
+
+        if (player == null)
+        {
+            throw new HubException("Joining to room was rejected");
+        }
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-        await Clients.Group(roomId).SendAsync("PlayerJoined", username);
+        await Clients.Group(roomId).SendAsync("PlayerJoined", player.ToPlayerDto());
     }
 
 
@@ -104,6 +132,12 @@ public class ConnectionUserHub : Hub
         if (string.IsNullOrWhiteSpace(roomId))
         {
             throw new HubException("Invalid room ID");
+        }
+
+        var player = _userConnectionService.GetPlayerInRoom(roomId, playerName);
+        if (player == null)
+        {
+            throw new HubException("Player doesn't exist in this room");
         }
 
         _userConnectionService.RemovePlayerFromRoom(roomId, playerName);
@@ -129,10 +163,30 @@ public class ConnectionUserHub : Hub
         var room = _userConnectionService.GetRoomById(roomId);
         if (room == null)
         {
+            await Clients.Caller.SendAsync("HandleError", $"Room with id - {roomId}, does not exist.");
             throw new HubException("Room not found");
         }
 
+        var player = _userConnectionService.GetPlayerByConnectionId(Context.ConnectionId);
+        if (player != null && _userConnectionService.GetPlayerInRoom(roomId, player.Username) == null)
+        {
+            await Clients.Caller.SendAsync("AccessDenied", "You are not part of this room.");
+            return;
+        }
+
         await Clients.Caller.SendAsync("ReceiveRoom", room.ToRoomResponse());
+    }
+
+    public async Task RemoveRoom(string roomId)
+    {
+        if (string.IsNullOrWhiteSpace(roomId))
+        {
+            throw new HubException("Invalid room ID");
+        }
+
+        _userConnectionService.RemoveRoom(roomId);
+
+        await Clients.All.SendAsync("RemoveRoom", roomId);
     }
 
 }

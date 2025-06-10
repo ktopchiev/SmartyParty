@@ -2,9 +2,12 @@ namespace Server.DTOs
 {
     public class RoomRequest
     {
-        public string Name { get; set; } = string.Empty;
-        public string Topic { get; set; } = string.Empty;
-        public string Language { get; set; } = string.Empty;
+        public required string Username { get; set; }
+        public required string RoomName { get; set; }
+        public required string Topic { get; set; }
+        public string? Language { get; set; }
+        public string? Number { get; set; }
+        public string? Difficulty { get; set; }
 
     }
 }

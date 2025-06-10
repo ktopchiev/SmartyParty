@@ -11,6 +11,9 @@ import HomePage from './features/HomePage.tsx';
 import { Provider } from 'react-redux';
 import { store } from './services/store.ts';
 import QuizRoomPage from './features/QuizRoomPage.tsx';
+import { FinalPage } from './features/FinalPage.tsx';
+import NotFoundPage from './features/NotFoundPage.tsx';
+import ServerError from './errors/ServerError.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
@@ -19,8 +22,9 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<App />} >
           <Route index element={<HomePage />} />
           <Route path="quizroom/:roomId" element={<QuizRoomPage />} />
-          {/* <Route path="about" element={<AboutPage />} /> */}
-          {/* <Route path="*" element={<NotFoundPage />} /> */}
+          <Route path="quizroom/:roomId/final" element={<FinalPage />} />
+          <Route path="/server-error" element={<ServerError />} />
+          <Route path="/not-found" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
