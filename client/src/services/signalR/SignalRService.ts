@@ -17,7 +17,6 @@ class SignalRService {
     private onErrorCallback: ((error: string) => void) | null = null;
 
     constructor() {
-        console.log("Creating SignalR connection...");
         this.signalRConnection = new HubConnectionBuilder()
             .withUrl(`${this.baseUrl}connectionuser`)
             .configureLogging("Information")

@@ -25,6 +25,7 @@ export const rtkQueryErrorLogger: Middleware =
                     break;
                 case 401:
                     toast.warn(errorPayload.title + ". " + 'Unathorized');
+                    localStorage.removeItem("user");
                     break;
                 case 400:
                     toast.error(errorPayload.detail || 'Bad Request');

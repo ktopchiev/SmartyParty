@@ -79,6 +79,7 @@ export default function HomePage() {
             console.log("Room created callback:", room);
             navigate(`/quizroom/${room.id}`);
         });
+
     }, []);
 
     const handleCreateRoom = async (data: FormData) => {

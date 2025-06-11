@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, type ReactHTMLElement } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import SignalRService from '../services/signalR/SignalRService';
 import { LogOut } from 'lucide-react';
@@ -21,7 +21,7 @@ const QuizRoomPage: React.FC = () => {
     const { roomId } = useParams<{ roomId: string }>();
     const id = roomId!;
     const { user } = useAppSelector((state) => state.user);
-    const { room, status, currentAnswer, questionIndex } = useAppSelector((state) => state.room);
+    const { room, status, currentAnswer, questionIndex, isLoaded } = useAppSelector((state) => state.room);
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
@@ -68,19 +68,14 @@ const QuizRoomPage: React.FC = () => {
 
                 await SignalRService.startUserRoomConnection();
             }
-
             await SignalRService.getRoomById(id);
-
-            if (!room?.players.find(u => u.username === user?.username)) {
-                console.log("Fetch room:", room?.players);
-            }
         }
 
         fetchRoom();
 
     }, [])
 
-    useEffect(() => {   
+    useEffect(() => {
         const endGame = async () => {
             if (room?.players.length! < 1 || final) {
                 await SignalRService.removeRoom(id);

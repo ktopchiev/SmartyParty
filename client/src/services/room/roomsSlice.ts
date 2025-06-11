@@ -11,6 +11,7 @@ export interface RoomState {
     status: string;
     gameStatus: string;
     questionIndex: number;
+    isLoaded: boolean;
 }
 
 const initialState: RoomState = {
@@ -20,6 +21,7 @@ const initialState: RoomState = {
     status: '',
     gameStatus: '',
     questionIndex: 0,
+    isLoaded: false,
 };
 
 const roomsSlice = createSlice({
@@ -29,6 +31,7 @@ const roomsSlice = createSlice({
         setRoom: (state, action: PayloadAction<Room>) => {
             state.room = action.payload;
             state.status = 'open';
+            state.isLoaded = true;
         },
         addMessageToRoom: (state, action: PayloadAction<Message>) => {
             if (state.room) {

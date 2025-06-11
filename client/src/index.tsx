@@ -14,19 +14,22 @@ import QuizRoomPage from './features/QuizRoomPage.tsx';
 import { FinalPage } from './features/FinalPage.tsx';
 import NotFoundPage from './features/NotFoundPage.tsx';
 import ServerError from './errors/ServerError.tsx';
+import { StrictMode } from 'react';
 
 createRoot(document.getElementById('root')!).render(
-  <Provider store={store}>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />} >
-          <Route index element={<HomePage />} />
-          <Route path="quizroom/:roomId" element={<QuizRoomPage />} />
-          <Route path="quizroom/:roomId/final" element={<FinalPage />} />
-          <Route path="/server-error" element={<ServerError />} />
-          <Route path="/not-found" element={<NotFoundPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  </Provider>
+  <StrictMode>
+    <Provider store={store}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />} >
+            <Route index element={<HomePage />} />
+            <Route path="quizroom/:roomId" element={<QuizRoomPage />} />
+            <Route path="quizroom/:roomId/final" element={<FinalPage />} />
+            <Route path="/server-error" element={<ServerError />} />
+            <Route path="/not-found" element={<NotFoundPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </Provider>
+  </StrictMode>
 )

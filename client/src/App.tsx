@@ -41,8 +41,8 @@ function App() {
 			}
 		};
 
-		startConnection();
 		fetchUserData();
+		startConnection();
 
 		if (error) {
 			toast.info("Session expired, please log in again.");

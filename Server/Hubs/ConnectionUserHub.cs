@@ -115,15 +115,26 @@ public class ConnectionUserHub : Hub
             throw new HubException("Invalid room ID or username");
         }
 
+        if (_userConnectionService.GetPlayerInRoomByConnectionId(roomId, Context.ConnectionId) != null)
+        {
+            throw new HubException("User is in the room already");
+        }
+
+        var oldConnectionId = _userConnectionService.GetConnectionIdByPlayer(username);
+
+        if (!string.IsNullOrEmpty(oldConnectionId))
+        {
+            await Groups.RemoveFromGroupAsync(oldConnectionId, roomId);
+        }
+
         var player = _userConnectionService.AddPlayerToRoom(roomId, username, Context.ConnectionId);
 
-        if (player == null)
+        if (player != null)
         {
-            throw new HubException("Joining to room was rejected");
+            await Clients.Group(roomId).SendAsync("PlayerJoined", player.ToPlayerDto());
         }
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-        await Clients.Group(roomId).SendAsync("PlayerJoined", player.ToPlayerDto());
     }
 
 
@@ -134,7 +145,7 @@ public class ConnectionUserHub : Hub
             throw new HubException("Invalid room ID");
         }
 
-        var player = _userConnectionService.GetPlayerInRoom(roomId, playerName);
+        var player = _userConnectionService.GetPlayerInRoomByConnectionId(roomId, Context.ConnectionId);
         if (player == null)
         {
             throw new HubException("Player doesn't exist in this room");
@@ -168,7 +179,7 @@ public class ConnectionUserHub : Hub
         }
 
         var player = _userConnectionService.GetPlayerByConnectionId(Context.ConnectionId);
-        if (player != null && _userConnectionService.GetPlayerInRoom(roomId, player.Username) == null)
+        if (player != null && _userConnectionService.GetPlayerInRoomByUsername(roomId, player.Username) == null)
         {
             await Clients.Caller.SendAsync("AccessDenied", "You are not part of this room.");
             return;

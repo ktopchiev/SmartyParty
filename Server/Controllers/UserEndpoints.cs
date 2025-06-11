@@ -25,12 +25,9 @@ namespace Server.Endpoints
                 return Results.BadRequest(new { message = "Username and password are required" });
             }
 
-            var existingUser = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == registerDto.Username);
+            if (await dbContext.Users.AnyAsync(u => u.Username == registerDto.Username)) return Results.Conflict(new { message = "Username already exists" });
 
-            if (existingUser != null)
-            {
-                return Results.Conflict(new { message = "User already exists" });
-            }
+            if (await dbContext.Users.AnyAsync(u => u.Email == registerDto.Email)) return Results.Conflict(new { message = "Email already exists" });
 
             var user = new User
             {

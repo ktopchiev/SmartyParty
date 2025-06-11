@@ -98,33 +98,56 @@ namespace Server.Services
             return room?.Players ?? new List<Player>();
         }
 
-        public Player GetPlayerInRoom(string roomId, string player)
+        public Player GetPlayerInRoomByConnectionId(string roomId, string connectionId)
         {
             var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
-            return room.Players.FirstOrDefault(p => p.Username == player);
+            return room.Players.FirstOrDefault(p => p.ConnectionId == connectionId);
+        }
+
+        public Player GetPlayerInRoomByUsername(string roomId, string username)
+        {
+            var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
+            return room.Players.FirstOrDefault(p => p.Username == username);
+        }
+
+        public string GetConnectionIdByPlayer(string player)
+        {
+            var foundPlayer = _Players.FirstOrDefault(p => p.Username == player);
+
+            if (foundPlayer == null) return string.Empty;
+
+            return foundPlayer.ConnectionId;
         }
 
         public Player AddPlayerToRoom(string roomId, string playerUserName, string connectionId)
         {
-            if (_Players.Any(p => p.Username == playerUserName)) return null;
-
             var existingRoom = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
 
             if (existingRoom == null) return null;
 
-            var player = new Player
+            var player = _Players.FirstOrDefault(p => p.Username == playerUserName);
+
+            if (player == null)
             {
-                Username = playerUserName,
-                ConnectionId = connectionId,
-                Points = 0,
-                CurrentQuestionIndex = 0
-            };
+                var newPlayer = new Player
+                {
+                    Username = playerUserName,
+                    ConnectionId = connectionId,
+                    Points = 0,
+                    CurrentQuestionIndex = 0
+                };
 
-            _Players.Add(player);
+                _Players.Add(newPlayer);
 
-            existingRoom.Players.Add(player);
+                existingRoom.Players.Add(newPlayer);
 
-            return player;
+                return newPlayer;
+            }
+
+            player.ConnectionId = connectionId;
+            existingRoom.Players.FirstOrDefault(p => p.Username == player.Username)!.ConnectionId = connectionId;
+
+            return null;
         }
 
         public void UpdatePlayerInRoom(string roomId, string playerUserName, int questionIndex = -1, int points = 0)

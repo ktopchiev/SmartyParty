@@ -32,7 +32,7 @@ export const userApi = createApi({
                     }
                 })
             }),
-            registerUser: build.mutation<string, RegisterRequest>({
+            userRegister: build.mutation<string, RegisterRequest>({
                 query: (credentials) => ({
                     url: "user/register",
                     method: "POST",
@@ -44,4 +44,4 @@ export const userApi = createApi({
     }
 })
 
-export const { useLoginMutation, useRefreshMutation, useRegisterUserMutation } = userApi;
+export const { useLoginMutation, useRefreshMutation, useUserRegisterMutation } = userApi;
