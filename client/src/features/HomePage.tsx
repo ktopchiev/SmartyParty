@@ -8,13 +8,15 @@ import type Room from "../models/Room";
 import { ToRoomRequest } from "../models/RoomRequest";
 import { toast } from "react-toastify";
 
+import { Container, Row, Col, Table, Button, Form, Spinner } from "react-bootstrap";
+
 export type FormData = {
     roomName: string;
     topic: string;
     language: string;
     number: string;
     difficulty: string;
-}
+};
 
 export default function HomePage() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -116,20 +118,18 @@ export default function HomePage() {
     }
 
     return (
-        // Table for list of active rooms
-        <div className="container d-flex flex-row justify-content-evenly mt-3">
-            <div className="container">
+        <Container className="mt-3 d-flex justify-content-evenly">
+            <div>
                 <h2 className="text-center">Rooms</h2>
-                {!loggedIn &&
-                    (<h5 className="text-center mark">Please log in to create or join rooms.</h5>)
-                }
-                <table className="table table-striped table-hover table-sm">
+                {!loggedIn && <h5 className="text-center mark">Please log in to create or join rooms.</h5>}
+                <Table striped hover size="sm">
                     <thead>
                         <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">Creator</th>
-                            <th scope="col">Topic</th>
-                            <th scope="col">Status</th>
+                            <th>Name</th>
+                            <th>Creator</th>
+                            <th>Topic</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -140,105 +140,100 @@ export default function HomePage() {
                                 <td>{room.topic}</td>
                                 <td>{room.status}</td>
                                 <td>
-                                    <button
-                                        className={`btn btn-warning mx-2`}
-                                        type="button"
+                                    <Button
+                                        variant="warning"
+                                        className="mx-2"
+                                        size="sm"
                                         onClick={() => handleJoinRoom(room.id)}
                                         disabled={!loggedIn || room.players.length >= 2}
                                     >
                                         Join
-                                    </button >
-                                    {user?.username === "admin" &&
-                                        (< button
-                                            className={`btn btn-danger`}
-                                            type="button"
+                                    </Button>
+                                    {user?.username === "admin" && (
+                                        <Button
+                                            variant="danger"
+                                            size="sm"
                                             onClick={() => handleRemoveRoom(room.id)}
                                         >
                                             Remove
-                                        </button >
-                                        )}
-                                </td >
-                            </tr >
+                                        </Button>
+                                    )}
+                                </td>
+                            </tr>
                         ))}
-                    </tbody >
-                </table >
-            </div >
+                    </tbody>
+                </Table>
+            </div>
 
-            {/* Form for creating a room */}
             {loggedIn && (
-                <div className="container d-flex flex-column" style={{ maxWidth: 600, margin: 0 }}>
-                    <form className="needs-validation" noValidate onSubmit={handleSubmit(handleCreateRoom)}>
-
-                        <div className="mb-3">
-                            <label htmlFor="roomName" className="form-label">Name</label>
-                            <input
+                <div style={{ maxWidth: 600 }}>
+                    <Form noValidate onSubmit={handleSubmit(handleCreateRoom)}>
+                        <Form.Group className="mb-3" controlId="roomName">
+                            <Form.Label>Name</Form.Label>
+                            <Form.Control
                                 type="text"
-                                className="form-control"
-                                id="roomName"
                                 placeholder="Enter room name..."
-                                aria-invalid={errors.roomName ? "true" : "false"}
+                                isInvalid={!!errors.roomName}
                                 {...register("roomName", { required: "Room name is required" })}
                             />
-                            {errors.roomName && <p className="small text-danger" role="alert">{errors.roomName.message}</p>}
-                        </div>
+                            <Form.Control.Feedback type="invalid">
+                                {errors.roomName?.message}
+                            </Form.Control.Feedback>
+                        </Form.Group>
 
-                        <div className="container d-flex justify-content-center">
-                            <div className="container d-flex flex-column mb-1 justify-content-center">
+                        <Row className="mb-3">
+                            <Col>
                                 <h5>Topic</h5>
                                 {topics.map((topic) => (
-                                    <div className="form-check"
+                                    <Form.Check
                                         key={topic.id}
-                                        aria-invalid={errors.topic ? "true" : "false"}
-                                    >
-                                        <input
-                                            className="form-check-input"
-                                            type="radio"
-                                            id={`radioDefault${topic.id}`}
-                                            value={topic.name}
-                                            {...register("topic", { required: "Quiz topic is required" })}
-                                        />
-                                        <label className="form-check-label small" htmlFor={`radioDefault${topic.id}`}>
-                                            {topic.name}
-                                        </label>
-                                    </div>
+                                        type="radio"
+                                        label={topic.name}
+                                        id={`radioDefault${topic.id}`}
+                                        value={topic.name}
+                                        isInvalid={!!errors.topic}
+                                        {...register("topic", { required: "Quiz topic is required" })}
+                                        name="topic"
+                                    />
                                 ))}
+                                <Form.Control.Feedback type="invalid" style={{ display: errors.topic ? "block" : "none" }}>
+                                    {errors.topic?.message}
+                                </Form.Control.Feedback>
+                            </Col>
 
-                            </div>
-                            <div className="container d-flex flex-column mb-3 justify-content-start">
-                                <select className="form-select form-select-sm mb-2" aria-label="Select language" defaultValue={"english"} {...register("language")}>
-                                    <option value={"Select language"} disabled>Select language</option>
-                                    {languages.map((lng) =>
+                            <Col>
+                                <Form.Select {...register("language")} defaultValue="english" className="mb-2">
+                                    <option disabled value="Select language">Select language</option>
+                                    {languages.map(lng => (
                                         <option key={lng.id} value={lng.language}>{lng.language}</option>
-                                    )}
-                                </select>
-                                <select className="form-select form-select-sm mb-2" aria-label="Select question number" defaultValue={"5"} {...register("number")}>
-                                    <option value={"Select number"} disabled>Select number</option>
-                                    {questionNumbers.map((num) =>
+                                    ))}
+                                </Form.Select>
+                                <Form.Select {...register("number")} defaultValue="5" className="mb-2">
+                                    <option disabled value="Select number">Select number</option>
+                                    {questionNumbers.map(num => (
                                         <option key={num.id} value={num.num}>{num.num}</option>
-                                    )}
-                                </select>
-                                <select className="form-select form-select-sm mb-2" aria-label="Select difficulty" defaultValue={"normal"} {...register("difficulty")}>
-                                    <option value={"Select difficulty"} disabled>Select difficulty</option>
-                                    {difficulties.map((diff) =>
+                                    ))}
+                                </Form.Select>
+                                <Form.Select {...register("difficulty")} defaultValue="normal" className="mb-2">
+                                    <option disabled value="Select difficulty">Select difficulty</option>
+                                    {difficulties.map(diff => (
                                         <option key={diff.id} value={diff.level}>{diff.level}</option>
-                                    )}
-                                </select>
-                                {errors.topic && <p className="small text-danger" role="alert">{errors.topic.message}</p>}
-                            </div>
-                        </div>
-                        {isLoading ?
-                            (<button className="btn btn-primary" type="button" disabled>
-                                <span className="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
-                                <span role="status">Creating Room...</span>
-                            </button>
-                            ) : (
-                                < button type="submit" className="btn btn-warning">Create New Room</button>
-                            )}
+                                    ))}
+                                </Form.Select>
+                            </Col>
+                        </Row>
 
-                    </form>
+                        {isLoading ? (
+                            <Button variant="primary" disabled>
+                                <Spinner as="span" animation="grow" size="sm" role="status" aria-hidden="true" />
+                                {' '}Creating Room...
+                            </Button>
+                        ) : (
+                            <Button variant="warning" type="submit">Create New Room</Button>
+                        )}
+                    </Form>
                 </div>
             )}
-
-        </div >
-    )
+        </Container>
+    );
 }

@@ -1,11 +1,17 @@
+import { Container, Navbar } from 'react-bootstrap';
+
 export default function Footer() {
     return (
-        <div>
-            <nav className="navbar fixed-bottom navbar-light bg-body-secondary">
-                <div className="container-fluid">
-                    <p>© SmartyParty, All Rights Reserved</p>
-                </div>
-            </nav>
-        </div>
-    )
+        <Navbar
+            fixed="bottom"
+            style={{ backgroundColor: '#212529' }} // Dark background explicitly set
+            className="shadow-sm py-3"
+        >
+            <Container className="justify-content-center">
+                <small style={{ color: '#f8f9fa' }}>
+                    © {new Date().getFullYear()} SmartyParty, All Rights Reserved
+                </small>
+            </Container>
+        </Navbar>
+    );
 }

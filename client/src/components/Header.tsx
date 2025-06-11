@@ -1,126 +1,102 @@
-import { LoginForm } from "./LoginForm";
-import { NavLink, useNavigate } from "react-router";
-import { RegisterForm } from "./RegisterForm";
+// components/Header.tsx
+import { useState } from "react";
+import { useNavigate, NavLink as RouterNavLink } from "react-router";
 import { useAppDispatch, useAppSelector } from "../services/store";
 import { setLogOut } from "../services/user/userSlice";
 import SignalRService from "../services/signalR/SignalRService";
-import { closeBsOffcanvas } from "../util/utilities";
 import { toast } from "react-toastify";
-import { useState } from "react";
 
+import { Navbar, Nav, Container, Offcanvas, Button, CloseButton } from "react-bootstrap";
+import { LoginForm } from "./LoginForm";
+import { RegisterForm } from "./RegisterForm";
 
 export default function Header() {
-
     const { loggedIn, user } = useAppSelector((state) => state.user);
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const [menuOpen, setMenuOpen] = useState(false);
-
-    const toggleMenu = () => setMenuOpen((prev) => !prev);
-    const closeMenu = () => setMenuOpen(false);
+    const [showLogin, setShowLogin] = useState(false);
+    const [showRegister, setShowRegister] = useState(false);
+    const [showUserMenu, setShowUserMenu] = useState(false);
 
     const handleLogout = () => {
         dispatch(setLogOut());
         SignalRService.stopUserRoomConnection();
-        toast.success("User logged out.")
-        closeBsOffcanvas();
+        toast.success("User logged out.");
         navigate("/");
-    }
+    };
 
     return (
         <>
-            <nav className="navbar navbar-expand-lg bg-body-tertiary" style={{ zIndex: 1000 }}>
-                <div className="container-fluid">
-                    <NavLink to="/" className="navbar-brand">SmartyParty</NavLink>
+            <Navbar expand="lg" bg="light" className="mb-3" sticky="top">
+                <Container fluid>
+                    <Navbar.Brand as={RouterNavLink} to="/">SmartyParty</Navbar.Brand>
 
-                    {/* Button for developer purposes */}
-                    <button type="button" className="btn btn-sm btn-warning" onClick={() =>
-                        console.log({
-                            state: SignalRService.getSignalRConnection()?.state,
-                            id: SignalRService.getSignalRConnection()?.connectionId
-                        })
-                    }>
-                        Ch conn
-                    </button>
-                    <button
-                        className="navbar-toggler"
-                        type="button"
-                        onClick={toggleMenu}
-                        aria-label="Toggle navigation"
+                    <Button
+                        variant="warning"
+                        size="sm"
+                        onClick={() =>
+                            console.log({
+                                state: SignalRService.getSignalRConnection()?.state,
+                                id: SignalRService.getSignalRConnection()?.connectionId,
+                            })
+                        }
                     >
-                        <span className="navbar-toggler-icon"></span>
-                    </button>
+                        Ch conn
+                    </Button>
 
-                    <div className={`collapse navbar-collapse ${menuOpen ? "show" : ""}`}>
+                    <Navbar.Toggle aria-controls="navbar-nav" />
+                    <Navbar.Collapse id="navbar-nav">
+                        <Nav className="ms-auto">
+                            {!loggedIn ? (
+                                <>
+                                    <Button variant="outline-primary" className="me-2" onClick={() => setShowLogin(true)}>
+                                        Login
+                                    </Button>
+                                    <Button variant="outline-success" onClick={() => setShowRegister(true)}>
+                                        Register
+                                    </Button>
+                                </>
+                            ) : (
+                                <Button variant="outline-dark" onClick={() => setShowUserMenu(true)}>
+                                    {user?.username}
+                                </Button>
+                            )}
+                        </Nav>
+                    </Navbar.Collapse>
+                </Container>
+            </Navbar>
 
-                        {/* Login and Register offcanvas */}
-                        {!loggedIn ? (
+            {/* Login Offcanvas */}
+            <Offcanvas show={showLogin} onHide={() => setShowLogin(false)} placement="end" backdrop="static">
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>Login</Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body>
+                    <LoginForm />
+                </Offcanvas.Body>
+            </Offcanvas>
 
-                            <div>
-                                <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                                    <li className="nav-item">
-                                        <button className="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasLogin" aria-controls="offcanvasLogin" aria-label="Toggle navigation" onClick={closeMenu}>
-                                            Login
-                                        </button>
-                                    </li>
-                                    <li className="nav-item">
-                                        <button className="btn" type="button" data-bs-backdrop="static" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRegister" aria-controls="offcanvasRegister" aria-label="Toggle navigation" onClick={closeMenu}>
-                                            Register
-                                        </button>
-                                    </li>
-                                </ul>
-                                <div className="offcanvas offcanvas-end" data-bs-backdrop="static" tabIndex={-1} id="offcanvasLogin" aria-labelledby="offcanvasLoginLabel">
-                                    <div className="offcanvas-header">
-                                        <h5 className="offcanvas-title" id="offcanvasLoginLabel">Login</h5>
-                                        <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                                    </div>
-                                    <div className="offcanvas-body">
-                                        <LoginForm />
-                                    </div>
-                                </div>
+            {/* Register Offcanvas */}
+            <Offcanvas show={showRegister} onHide={() => setShowRegister(false)} placement="end" backdrop="static">
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>Register</Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body>
+                    <RegisterForm />
+                </Offcanvas.Body>
+            </Offcanvas>
 
-                                <div className="offcanvas offcanvas-end" tabIndex={-1} id="offcanvasRegister" aria-labelledby="offcanvasRegisterLabel">
-                                    <div className="offcanvas-header">
-                                        <h5 className="offcanvas-title" id="offcanvasRegisterLabel">Register</h5>
-                                        <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                                    </div>
-                                    <div className="offcanvas-body">
-                                        <RegisterForm />
-                                    </div>
-                                </div>
-                            </div>
-
-                        ) : (
-
-                            // Logged user menu
-                            <div>
-                                <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                                    <li className="nav-item">
-                                        <button className="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUser" aria-controls="offcanvasUser" aria-label="Toggle navigation">
-                                            {user?.username}
-                                        </button>
-                                    </li>
-                                </ul>
-                                <div className="offcanvas offcanvas-end" tabIndex={-1} id="offcanvasUser" aria-labelledby="offcanvasUserLabel">
-                                    <div className="offcanvas-header">
-                                        <h5 className="offcanvas-title" id="offcanvasUserLabel">{user?.email}</h5>
-                                        <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                                    </div>
-                                    <div className="offcanvas-body">
-                                        <div className="d-flex flex-column gap-2">
-                                            <button className="btn btn-primary outlined">Profile</button>
-                                            <button className="btn btn-warning">Create room</button>
-                                            <button className="btn btn-primary" onClick={handleLogout}>Log Out</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </nav >
+            {/* User Offcanvas */}
+            <Offcanvas show={showUserMenu} onHide={() => setShowUserMenu(false)} placement="end">
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>{user?.email}</Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body className="d-flex flex-column gap-2">
+                    <Button variant="primary" className="w-100">Profile</Button>
+                    <Button variant="warning" className="w-100">Create room</Button>
+                    <Button variant="danger" className="w-100" onClick={handleLogout}>Log Out</Button>
+                </Offcanvas.Body>
+            </Offcanvas>
         </>
-
-    )
+    );
 }
-
