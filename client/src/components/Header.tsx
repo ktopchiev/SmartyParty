@@ -6,7 +6,7 @@ import { setLogOut } from "../services/user/userSlice";
 import SignalRService from "../services/signalR/SignalRService";
 import { toast } from "react-toastify";
 
-import { Navbar, Nav, Container, Offcanvas, Button, CloseButton } from "react-bootstrap";
+import { Navbar, Nav, Container, Offcanvas, Button } from "react-bootstrap";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
 
@@ -41,7 +41,7 @@ export default function Header() {
                             })
                         }
                     >
-                        Ch conn
+                        Conn
                     </Button>
 
                     <Navbar.Toggle aria-controls="navbar-nav" />
@@ -67,7 +67,7 @@ export default function Header() {
             </Navbar>
 
             {/* Login Offcanvas */}
-            <Offcanvas show={showLogin} onHide={() => setShowLogin(false)} placement="end" backdrop="static">
+            <Offcanvas show={showLogin} onHide={() => setShowLogin(false)} placement="end" backdrop={true}>
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Login</Offcanvas.Title>
                 </Offcanvas.Header>
@@ -77,7 +77,7 @@ export default function Header() {
             </Offcanvas>
 
             {/* Register Offcanvas */}
-            <Offcanvas show={showRegister} onHide={() => setShowRegister(false)} placement="end" backdrop="static">
+            <Offcanvas show={showRegister} onHide={() => setShowRegister(false)} placement="end" backdrop={true}>
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Register</Offcanvas.Title>
                 </Offcanvas.Header>
@@ -87,7 +87,7 @@ export default function Header() {
             </Offcanvas>
 
             {/* User Offcanvas */}
-            <Offcanvas show={showUserMenu} onHide={() => setShowUserMenu(false)} placement="end">
+            <Offcanvas show={showUserMenu} onHide={() => setShowUserMenu(false)} placement="end" backdrop={true}>
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>{user?.email}</Offcanvas.Title>
                 </Offcanvas.Header>
