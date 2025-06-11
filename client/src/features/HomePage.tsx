@@ -110,9 +110,9 @@ export default function HomePage() {
             </div>
 
             {loggedIn && (
-                <div style={{ maxWidth: 600 }}>
+                <Container className="d-none d-md-block" style={{ maxWidth: 600 }}>
                     <CreateRoomForm />
-                </div>
+                </Container>
             )}
         </Container>
     );

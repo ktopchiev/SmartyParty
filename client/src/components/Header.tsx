@@ -6,9 +6,10 @@ import { setLogOut } from "../services/user/userSlice";
 import SignalRService from "../services/signalR/SignalRService";
 import { toast } from "react-toastify";
 
-import { Navbar, Nav, Container, Offcanvas, Button } from "react-bootstrap";
+import { Navbar, Nav, Container, Offcanvas, Button, Accordion } from "react-bootstrap";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
+import CreateRoomForm from "./CreateRoomForm";
 
 export default function Header() {
     const { loggedIn, user } = useAppSelector((state) => state.user);
@@ -27,7 +28,7 @@ export default function Header() {
 
     return (
         <>
-            <Navbar expand="lg" bg="light" className="mb-3" sticky="top">
+            <Navbar expand="lg" bg="light" className="mb-3">
                 <Container fluid>
                     <Navbar.Brand as={RouterNavLink} to="/">SmartyParty</Navbar.Brand>
 
@@ -93,7 +94,14 @@ export default function Header() {
                 </Offcanvas.Header>
                 <Offcanvas.Body className="d-flex flex-column gap-2">
                     <Button variant="primary" className="w-100">Profile</Button>
-                    <Button variant="warning" className="w-100">Create room</Button>
+                    <Accordion className="d-block d-md-none small">
+                        <Accordion.Item eventKey="0" >
+                            <Accordion.Header >Create Room</Accordion.Header>
+                            <Accordion.Body>
+                                <CreateRoomForm />
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    </Accordion>
                     <Button variant="danger" className="w-100" onClick={handleLogout}>Log Out</Button>
                 </Offcanvas.Body>
             </Offcanvas>

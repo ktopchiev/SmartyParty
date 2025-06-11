@@ -5,6 +5,7 @@ import SignalRService from "../services/signalR/SignalRService";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useAppSelector } from "../services/store";
+import { useScreenSize } from "../hooks/useScreenSize";
 
 import { Row, Col, Button, Form, Spinner } from "react-bootstrap";
 
@@ -18,13 +19,14 @@ export type FormData = {
 
 export default function CreateRoomForm() {
 
+    const { user } = useAppSelector((state) => state.user);
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const { user } = useAppSelector((state) => state.user);
+    const screenSize = useScreenSize();
 
     const topics = [
         { id: 1, name: "General Knowledge" },
-        { id: 2, name: "Rock and Metal Music" },
+        { id: 2, name: "Rock & Metal Music" },
         { id: 3, name: "Pets" },
         { id: 4, name: "Cinema" },
         { id: 5, name: "Literature" },
@@ -74,6 +76,19 @@ export default function CreateRoomForm() {
         setIsLoading(false);
     }
 
+    const styles = {
+        topicListStyle: () => {
+
+            return {
+                height: '150px',
+                overflowY: 'auto',
+                border: '1px solid #ccc',
+                padding: '10px',
+                borderRadius: '5px'
+            }
+        }
+    };
+
     return (
         <div>
             <Form noValidate onSubmit={handleSubmit(handleCreateRoom)}>
@@ -91,24 +106,27 @@ export default function CreateRoomForm() {
                 </Form.Group>
 
                 <Row className="mb-3">
-                    <Col>
-                        <h5>Topic</h5>
-                        {topics.map((topic) => (
-                            <Form.Check
-                                key={topic.id}
-                                type="radio"
-                                label={topic.name}
-                                id={`radioDefault${topic.id}`}
-                                value={topic.name}
-                                isInvalid={!!errors.topic}
-                                {...register("topic", { required: "Quiz topic is required" })}
-                                name="topic"
-                            />
-                        ))}
-                        <Form.Control.Feedback type="invalid" style={{ display: errors.topic ? "block" : "none" }}>
-                            {errors.topic?.message}
-                        </Form.Control.Feedback>
-                    </Col>
+                    <Row className="mb-2">
+                        <Form.Label>Topic</Form.Label>
+                        <div style={styles.topicListStyle() as React.CSSProperties}>
+                            {topics.map((topic) => (
+                                <Form.Check
+                                    key={topic.id}
+                                    type="radio"
+                                    label={topic.name}
+                                    id={`radioDefault${topic.id}`}
+                                    value={topic.name}
+                                    isInvalid={!!errors.topic}
+                                    {...register("topic", { required: "Quiz topic is required" })}
+                                    name="topic"
+                                />
+                            ))}
+
+                            <Form.Control.Feedback type="invalid" style={{ display: errors.topic ? "block" : "none" }}>
+                                {errors.topic?.message}
+                            </Form.Control.Feedback>
+                        </div>
+                    </Row>
 
                     <Col>
                         <Form.Select {...register("language")} defaultValue="english" className="mb-2">
@@ -131,15 +149,16 @@ export default function CreateRoomForm() {
                         </Form.Select>
                     </Col>
                 </Row>
-
-                {isLoading ? (
-                    <Button variant="primary" disabled>
-                        <Spinner as="span" animation="grow" size="sm" role="status" aria-hidden="true" />
-                        {' '}Creating Room...
-                    </Button>
-                ) : (
-                    <Button variant="warning" type="submit">Create New Room</Button>
-                )}
+                <Row>
+                    {isLoading ? (
+                        <Button variant="primary" disabled>
+                            <Spinner as="span" animation="grow" size="sm" role="status" aria-hidden="true" />
+                            {' '}Creating Room...
+                        </Button>
+                    ) : (
+                        <Button variant="warning" type="submit">Create New Room</Button>
+                    )}
+                </Row>
             </Form>
         </div>
     )

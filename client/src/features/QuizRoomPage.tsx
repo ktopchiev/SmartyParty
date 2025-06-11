@@ -3,12 +3,12 @@ import { useNavigate, useParams } from "react-router";
 import SignalRService from "../services/signalR/SignalRService";
 import { LogOut } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../services/store";
-import ChatWindow from "../components/ChatWindow";
 import { HubConnectionState } from "@microsoft/signalr";
 import type { Option } from "../models/Room";
 import { toast } from "react-toastify";
 import type Answer from "../models/Answer";
 import { resetCurrentAnswer } from "../services/room/roomsSlice";
+import ChatUI from "../components/chat/ChatUI";
 
 import {
     Container,
@@ -19,7 +19,6 @@ import {
     ProgressBar,
     ListGroup,
     Card,
-    Spinner,
 } from "react-bootstrap";
 
 const timer = 30;
@@ -180,8 +179,8 @@ const QuizRoomPage: React.FC = () => {
         <Container fluid="md" className="mt-2 bg-light text-dark" style={{ minHeight: "90vh", maxWidth: "1200px" }}>
             <Row>
                 <Col md={8}>
-                    <div className="d-flex justify-content-between align-items-start mb-1">
-                        <div className="flex-grow-1">
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                        <Col xs={4} md={8}>
                             <Badge bg="dark" className="me-2">
                                 Room: <strong>{room?.name}</strong>
                             </Badge>
@@ -199,8 +198,8 @@ const QuizRoomPage: React.FC = () => {
                             >
                                 <LogOut size={16} /> Leave Room
                             </span>
-                        </div>
-                        <div className="text-end flex-grow-1">
+                        </Col>
+                        <Col xs={6} md={4} className="text-end">
                             <Badge bg="primary">Players: {room?.players.length}/2</Badge>
                             <ListGroup variant="flush" className="mt-1 small">
                                 {room?.players.map((p, i) => (
@@ -209,10 +208,10 @@ const QuizRoomPage: React.FC = () => {
                                     </ListGroup.Item>
                                 ))}
                             </ListGroup>
-                        </div>
+                        </Col>
                     </div>
 
-                    <div className="d-flex justify-content-between align-items-center mb-2">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
                         <div className="small text-muted">
                             Question <strong>{room?.questions[questionIndex]?.id} of {room?.numberOfQuestions || 0}</strong>
                         </div>
@@ -269,22 +268,22 @@ const QuizRoomPage: React.FC = () => {
                                 })}
                             </ListGroup>
 
-                            <div className="text-center mt-4">
+                            <Row className="text-center mt-4">
                                 <Button
-                                    variant="outline-warning"
+                                    variant="btn btn-warning"
                                     disabled={!showAnswer}
                                     onClick={onNext}
                                     className="fw-semibold"
                                 >
                                     Next
                                 </Button>
-                            </div>
+                            </Row>
                         </Card.Body>
                     </Card>
                 </Col>
 
                 <Col md={4}>
-                    <ChatWindow roomId={id} />
+                    <ChatUI />
                 </Col>
             </Row>
         </Container>
