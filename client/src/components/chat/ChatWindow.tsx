@@ -20,6 +20,7 @@ export default function ChatWindow({ roomId }: Props) {
 				roomId,
 				from: user?.username!,
 				content: input.trim(),
+				isRead: false,
 			};
 
 			if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {

@@ -52,7 +52,9 @@ namespace Server.Services
             room.Players.Add(new Player
             {
                 Username = playerName,
-                ConnectionId = connectionId
+                ConnectionId = connectionId,
+                CurrentQuestionIndex = 0,
+                Points = 0,
             });
 
             return room;
@@ -147,7 +149,7 @@ namespace Server.Services
             player.ConnectionId = connectionId;
             existingRoom.Players.FirstOrDefault(p => p.Username == player.Username)!.ConnectionId = connectionId;
 
-            return null;
+            return player;
         }
 
         public void UpdatePlayerInRoom(string roomId, string playerUserName, int questionIndex = -1, int points = 0)

@@ -3,16 +3,23 @@ import { Modal, Button, Badge } from 'react-bootstrap';
 import { ChatDots } from 'react-bootstrap-icons';
 import ChatWindow from './ChatWindow';
 import { useParams } from 'react-router';
+import { useAppDispatch, useAppSelector, type RootState } from '../../services/store';
+import { setUnreadMessagesCount } from '../../services/room/roomsSlice';
 
 function ChatUI() {
 	const [showModal, setShowModal] = useState(false);
-	const [unreadCount, setUnreadCount] = useState(3);
+	const { room, unreadMessages } = useAppSelector((state: RootState) => state.room);
+	const dispatch = useAppDispatch();
 	const { roomId } = useParams<{ roomId: string }>();
 
 	const openChat = () => {
 		setShowModal(true);
-		setUnreadCount(0);
+		dispatch(setUnreadMessagesCount(0));
 	};
+
+	const readMessages = (count: number): void => {
+		
+	}
 
 	const closeChat = () => setShowModal(false);
 
@@ -35,14 +42,14 @@ function ChatUI() {
 				onClick={openChat}
 			>
 				<ChatDots size={24} />
-				{unreadCount > 0 && (
+				{unreadMessages > 0 && (
 					<Badge
 						pill
 						bg="danger"
 						className="position-absolute top-0 start-100 translate-middle"
 						style={{ fontSize: '0.7rem' }}
 					>
-						{unreadCount}
+						{unreadMessages}
 					</Badge>
 				)}
 			</Button>

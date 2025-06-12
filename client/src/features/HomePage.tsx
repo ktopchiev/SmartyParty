@@ -22,18 +22,31 @@ export default function HomePage() {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-
 		const fetchAndSetRooms = async () => {
-			if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
-				await SignalRService.startUserRoomConnection();
+			const connection = SignalRService.getSignalRConnection();
+
+			if (!connection) {
+				console.error("No SignalR connection instance found");
+				return;
 			}
 
+			if (connection.state !== HubConnectionState.Connected) {
+				try {
+					await SignalRService.startUserRoomConnection();
+				} catch (error) {
+					console.error("Failed to start SignalR connection", error);
+					return;
+				}
+			}
+
+			await new Promise(resolve => setTimeout(resolve, 100));
+
 			await SignalRService.getRooms();
-		}
+		};
 
 		fetchAndSetRooms();
-
 	}, []);
+
 
 	useEffect(() => {
 

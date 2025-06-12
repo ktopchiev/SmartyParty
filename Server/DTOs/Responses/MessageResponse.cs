@@ -6,5 +6,6 @@ namespace Server.DTOs
         public required string RoomId { get; set; }
         public required string From { get; set; }
         public required string Content { get; set; }
+        public bool IsRead { get; set; } = false;
     }
 }

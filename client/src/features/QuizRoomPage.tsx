@@ -7,7 +7,7 @@ import { HubConnectionState } from "@microsoft/signalr";
 import type { Option } from "../models/Room";
 import { toast } from "react-toastify";
 import type Answer from "../models/Answer";
-import { resetCurrentAnswer } from "../services/room/roomsSlice";
+import { resetCurrentAnswer, setStatus } from "../services/room/roomsSlice";
 import ChatUI from "../components/chat/ChatUI";
 
 import {
@@ -32,7 +32,7 @@ const QuizRoomPage: React.FC = () => {
 	const { roomId } = useParams<{ roomId: string }>();
 	const id = roomId!;
 	const { user } = useAppSelector((state) => state.user);
-	const { room, status, currentAnswer, questionIndex, isLoaded } = useAppSelector(
+	const { room, status, currentAnswer, questionIndex, availability } = useAppSelector(
 		(state) => state.room
 	);
 	const dispatch = useAppDispatch();
@@ -70,20 +70,34 @@ const QuizRoomPage: React.FC = () => {
 	}, [questionIndex, timer, gameStart]);
 
 	useEffect(() => {
+
 		SignalRService.setOnErrorCallback((error) => {
 			console.error("SignalR error:", error);
 			navigate("/not-found"); // Redirect user
 		});
 
 		const fetchRoom = async () => {
+
 			if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
 				await SignalRService.startUserRoomConnection();
 			}
-			await SignalRService.getRoomById(id);
+
+			await SignalRService.getRoom(id, player?.username!);
+
 		};
 
+		dispatch(setStatus('loading'));
 		fetchRoom();
 	}, []);
+
+	useEffect(() => {
+
+		const joinRoom = async () => {
+			await SignalRService.joinRoom(id, user?.username!);
+		}
+
+		if (status === 'ready') joinRoom();
+	}, [status])
 
 	useEffect(() => {
 		const endGame = async () => {
@@ -99,11 +113,11 @@ const QuizRoomPage: React.FC = () => {
 	}, [final, room?.players]);
 
 	useEffect(() => {
-		if (status === "closed") {
+		if (availability === 'closed') {
 			toast.error(`Room ${room?.name} was closed.`);
 			navigate("/");
 		}
-	}, [status]);
+	}, [availability]);
 
 	const handleLeaveRoom = async () => {
 		if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
@@ -174,6 +188,8 @@ const QuizRoomPage: React.FC = () => {
 			""
 		);
 	}
+
+	if (status === 'loading') return <div>Loading...</div>
 
 	return (
 		<Container fluid="md" className="mt-2 bg-light text-dark" style={{ minHeight: "90vh", maxWidth: "1200px" }}>

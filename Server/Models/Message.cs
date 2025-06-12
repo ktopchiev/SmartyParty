@@ -19,7 +19,8 @@ namespace Server.Models
                 Id = message.Id,
                 RoomId = message.RoomId,
                 From = message.From,
-                Content = message.Content
+                Content = message.Content,
+                IsRead = false,
             };
         }
     }

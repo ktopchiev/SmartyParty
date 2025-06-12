@@ -49,7 +49,7 @@ public class ConnectionUserHub : Hub
         }
 
         var message = _userConnectionService.AddMessage(messageRequest.ToMessage());
-        await Clients.Group(messageRequest.RoomId).SendAsync("ReceiveMessage", message);
+        await Clients.Group(messageRequest.RoomId).SendAsync("ReceiveMessage", message.ToMessageResponse());
     }
 
     public async Task UpdatePlayer(string roomId, PlayerDto player)
@@ -115,25 +115,14 @@ public class ConnectionUserHub : Hub
             throw new HubException("Invalid room ID or username");
         }
 
-        if (_userConnectionService.GetPlayerInRoomByConnectionId(roomId, Context.ConnectionId) != null)
-        {
-            throw new HubException("User is in the room already");
-        }
-
-        var oldConnectionId = _userConnectionService.GetConnectionIdByPlayer(username);
-
-        if (!string.IsNullOrEmpty(oldConnectionId))
-        {
-            await Groups.RemoveFromGroupAsync(oldConnectionId, roomId);
-        }
-
         var player = _userConnectionService.AddPlayerToRoom(roomId, username, Context.ConnectionId);
 
-        if (player != null)
+        if (player == null)
         {
-            await Clients.Group(roomId).SendAsync("PlayerJoined", player.ToPlayerDto());
+            throw new HubException("Room does not exist");
         }
 
+        await Clients.Group(roomId).SendAsync("PlayerJoined", player.ToPlayerDto());
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
     }
 
@@ -160,11 +149,14 @@ public class ConnectionUserHub : Hub
     public async Task GetRooms()
     {
         var rooms = _userConnectionService.GetRooms();
-        var roomListResponse = rooms.Select(r => r.ToRoomResponse()).ToList();
-        await Clients.All.SendAsync("ReceiveRoomList", roomListResponse);
+        if (rooms != null)
+        {
+            var roomListResponse = rooms.Select(r => r.ToRoomResponse()).ToList();
+            await Clients.All.SendAsync("ReceiveRoomList", roomListResponse);
+        }
     }
 
-    public async Task GetRoomById(string roomId)
+    public async Task GetRoom(string roomId, string playerUserName)
     {
         if (string.IsNullOrWhiteSpace(roomId))
         {
@@ -178,7 +170,7 @@ public class ConnectionUserHub : Hub
             throw new HubException("Room not found");
         }
 
-        var player = _userConnectionService.GetPlayerByConnectionId(Context.ConnectionId);
+        var player = _userConnectionService.GetPlayerByUsername(playerUserName);
         if (player != null && _userConnectionService.GetPlayerInRoomByUsername(roomId, player.Username) == null)
         {
             await Clients.Caller.SendAsync("AccessDenied", "You are not part of this room.");

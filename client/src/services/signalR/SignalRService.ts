@@ -35,6 +35,7 @@ class SignalRService {
     }
 
     public async startUserRoomConnection() {
+
         if (this.signalRConnection?.state === HubConnectionState.Connected) return;
 
         this.signalRConnection?.on("UserConnected", () => {
@@ -42,13 +43,21 @@ class SignalRService {
         });
 
         try {
-            await this.signalRConnection?.start().catch((error) => console.error(error));
-            console.assert(this.signalRConnection?.state as HubConnectionState === HubConnectionState.Connected);
+            await this.signalRConnection?.start();
             console.log("SignalR connection started.");
         } catch (error) {
-            console.assert(this.signalRConnection?.state === HubConnectionState.Disconnected);
             console.log(error);
         }
+
+        this.signalRConnection?.onclose(async () => {
+            console.warn("SignalR disconnected, trying to reconnect...");
+            try {
+                await this.signalRConnection?.start();
+                console.log("Reconnected to SignalR.");
+            } catch (err) {
+                console.error("Reconnection failed:", err);
+            }
+        });
 
         this.signalRConnection?.on("RoomCreated", (room) => {
             console.log("Room created:", room);
@@ -189,21 +198,27 @@ class SignalRService {
             return;
         }
 
+        if (this.signalRConnection.state !== HubConnectionState.Connected) {
+            console.warn("Connection is not in 'Connected' state, current:", this.signalRConnection.state);
+            return;
+        }
+
+
         try {
             await this.signalRConnection?.invoke("GetRooms");
-        } catch (error) {
-            console.error("Error getting rooms:", error);
+        } catch (error: any) {
+            console.error("Error invoking 'GetRooms':", error.message, error);
         }
     }
 
-    public async getRoomById(roomId: string) {
+    public async getRoom(roomId: string, player: string) {
         if (!this.signalRConnection) {
             console.error("SignalR connection is not established.");
             return;
         }
 
         try {
-            await this.signalRConnection?.invoke("GetRoomById", roomId);
+            await this.signalRConnection?.invoke("GetRoom", roomId, player);
         } catch (error: any) {
             this.onErrorCallback?.(error.message || "Unknown error");
         }

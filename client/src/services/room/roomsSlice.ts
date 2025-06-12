@@ -8,20 +8,22 @@ export interface RoomState {
     room: Room | null;
     roomsList: Room[];
     currentAnswer: Answer | null;
-    status: string;
+    status: 'idle' | 'loading' | 'ready' | 'error';
     gameStatus: string;
     questionIndex: number;
-    isLoaded: boolean;
+    availability: 'open' | 'closed';
+    unreadMessages: number;
 }
 
 const initialState: RoomState = {
     room: null,
     roomsList: [],
     currentAnswer: null,
-    status: '',
+    status: 'idle',
     gameStatus: '',
     questionIndex: 0,
-    isLoaded: false,
+    availability: 'open',
+    unreadMessages: 0,
 };
 
 const roomsSlice = createSlice({
@@ -30,16 +32,22 @@ const roomsSlice = createSlice({
     reducers: {
         setRoom: (state, action: PayloadAction<Room>) => {
             state.room = action.payload;
-            state.status = 'open';
-            state.isLoaded = true;
+            state.status = 'ready';
+        },
+        setStatus: (state, action: PayloadAction<'idle' | 'loading' | 'ready' | 'error'>) => {
+            state.status = action.payload;
         },
         addMessageToRoom: (state, action: PayloadAction<Message>) => {
             if (state.room) {
                 state.room.messages = [...state.room.messages, action.payload];
             }
+            state.unreadMessages += 1;
+        },
+        setUnreadMessagesCount: (state, action: PayloadAction<number>) => {
+            state.unreadMessages = action.payload;
         },
         addPlayer: (state, action: PayloadAction<Player>) => {
-            if (state.room) {
+            if (state.room && !state.room.players.find(p => p.username === action.payload.username)) {
                 state.room.players = [...state.room.players, action.payload];
             }
         },
@@ -66,7 +74,7 @@ const roomsSlice = createSlice({
         removeRoom: (state, action: PayloadAction<string>) => {
             if (state.roomsList) {
                 state.roomsList = state.roomsList.filter(r => r.id !== action.payload);
-                state.status = 'closed';
+                state.availability = 'closed';
             }
         },
         setCurrentAnswer: (state, action: PayloadAction<Answer>) => {
@@ -83,7 +91,9 @@ const roomsSlice = createSlice({
 
 export const {
     setRoom,
+    setStatus,
     addMessageToRoom,
+    setUnreadMessagesCount,
     addPlayer,
     updatePlayer,
     removePlayer,
