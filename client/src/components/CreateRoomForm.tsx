@@ -5,8 +5,6 @@ import SignalRService from "../services/signalR/SignalRService";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useAppSelector } from "../services/store";
-import { useScreenSize } from "../hooks/useScreenSize";
-
 import { Row, Col, Button, Form, Spinner } from "react-bootstrap";
 
 export type FormData = {
@@ -22,7 +20,6 @@ export default function CreateRoomForm() {
     const { user } = useAppSelector((state) => state.user);
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const screenSize = useScreenSize();
 
     const topics = [
         { id: 1, name: "General Knowledge" },
@@ -78,11 +75,10 @@ export default function CreateRoomForm() {
 
     const styles = {
         topicListStyle: () => {
-
             return {
                 height: '150px',
                 overflowY: 'auto',
-                border: '1px solid #ccc',
+                border: '1px solid #dee2e6',
                 padding: '10px',
                 borderRadius: '5px'
             }
@@ -106,8 +102,8 @@ export default function CreateRoomForm() {
                 </Form.Group>
 
                 <Row className="mb-3">
-                    <Row className="mb-2">
-                        <Form.Label>Topic</Form.Label>
+                    <Form.Label>Topic</Form.Label>
+                    <Row className="mb-2 mx-0">
                         <div style={styles.topicListStyle() as React.CSSProperties}>
                             {topics.map((topic) => (
                                 <Form.Check
@@ -121,14 +117,14 @@ export default function CreateRoomForm() {
                                     name="topic"
                                 />
                             ))}
-
-                            <Form.Control.Feedback type="invalid" style={{ display: errors.topic ? "block" : "none" }}>
-                                {errors.topic?.message}
-                            </Form.Control.Feedback>
                         </div>
+                        <p style={{ color: "red" }}>
+                            {errors.topic?.message}
+                        </p>
                     </Row>
 
                     <Col>
+                        <Form.Label>Settings</Form.Label>
                         <Form.Select {...register("language")} defaultValue="english" className="mb-2">
                             <option disabled value="Select language">Select language</option>
                             {languages.map(lng => (
@@ -153,7 +149,7 @@ export default function CreateRoomForm() {
                     {isLoading ? (
                         <Button variant="primary" disabled>
                             <Spinner as="span" animation="grow" size="sm" role="status" aria-hidden="true" />
-                            {' '}Creating Room...
+                            {' '}AI is generating the room...
                         </Button>
                     ) : (
                         <Button variant="warning" type="submit">Create New Room</Button>

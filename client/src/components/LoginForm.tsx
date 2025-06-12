@@ -8,7 +8,6 @@ import { useAppDispatch } from "../services/store";
 import SignalRService from "../services/signalR/SignalRService";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { closeBsOffcanvas } from "../util/utilities";
 
 import { Form, Button, InputGroup, Image } from "react-bootstrap";
 
@@ -37,7 +36,7 @@ export function LoginForm() {
             reset();
             await SignalRService.startUserRoomConnection();
             toast.success("User logged in successfully!");
-            closeBsOffcanvas();
+            //close offcanvas here
             navigate("/");
         } catch (error) {
             console.error(error);

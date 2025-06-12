@@ -9,7 +9,7 @@ export default function Footer() {
         >
             <Container className="justify-content-center">
                 <small style={{ color: '#f8f9fa' }}>
-                    © {new Date().getFullYear()} SmartyParty, All Rights Reserved
+                    © {new Date().getFullYear()} SmartyParty - AI Powered, All Rights Reserved
                 </small>
             </Container>
         </Navbar>

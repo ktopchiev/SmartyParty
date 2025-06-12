@@ -2,11 +2,12 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { toast } from "react-toastify";
-import { closeBsOffcanvas } from "../util/utilities";
 import { useUserRegisterMutation } from "../services/user/userApi";
 import type RegisterRequest from "../models/RegisterRequest";
 
 import { Form, Button, Image } from "react-bootstrap";
+import { useAppDispatch } from "../services/store";
+import { setRegistered } from "../services/user/userSlice";
 
 type FormData = {
     username: string;
@@ -22,15 +23,10 @@ type ServerError = {
 };
 
 export function RegisterForm() {
-    const {
-        register,
-        handleSubmit,
-        reset,
-        setError,
-        formState: { errors },
-    } = useForm<FormData>();
+    const { register, handleSubmit, reset, setError, formState: { errors }, } = useForm<FormData>();
     const [userRegister] = useUserRegisterMutation();
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
 
     const onSubmit = handleSubmit((data: FormData) => {
         const registerRequest: RegisterRequest = {
@@ -44,7 +40,7 @@ export function RegisterForm() {
             .then(() => {
                 toast.success("User registered successfuly - please log in!");
                 reset();
-                closeBsOffcanvas();
+                dispatch(setRegistered(true));
                 navigate("/");
             })
             .catch((err: ServerError) => {

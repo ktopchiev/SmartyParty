@@ -4,12 +4,14 @@ import type { User } from "../../models/User";
 interface InitialState {
     user: User | null;
     loggedIn: boolean;
+    registered: boolean;
 }
 
 const init = () => {
     const initialState: InitialState = {
         user: null,
         loggedIn: false,
+        registered: false,
     }
 
     return initialState;
@@ -27,9 +29,12 @@ export const userSlice = createSlice({
             state.user = null;
             state.loggedIn = false;
             localStorage.removeItem("user");
+        },
+        setRegistered: (state, action: PayloadAction<boolean>) => {
+            state.registered = action.payload;
         }
 
     },
 });
 
-export const { setCurrentUser, setLogOut, } = userSlice.actions
+export const { setCurrentUser, setLogOut, setRegistered } = userSlice.actions
