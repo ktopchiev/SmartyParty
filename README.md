@@ -1,9 +1,9 @@
-### Smarty Party
+# Smarty Party
 
-## This is a full-stack AI Powered web application.
-## It is a real-time multiplayer quiz game built with ASP.NET, React, Redux Toolkit, SignalR, and PostgreSQL. 
-## Players can join quiz rooms, chat, and compete in live trivia rounds.
-## It is containerized with Docker and deployed on Fly.io.
+### This is a full-stack AI Powered web application.
+### It is a real-time multiplayer quiz game built with ASP.NET, React, Redux Toolkit, SignalR, and PostgreSQL. 
+### Players can join quiz rooms, chat, and compete in live trivia rounds.
+### It is containerized with Docker and deployed on Fly.io.
 
 ## 🔑 Key Features
 
