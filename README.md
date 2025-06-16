@@ -1,9 +1,9 @@
-## Smarty Party
+### Smarty Party
 
-### This is a full-stack AI Powered web application.
-### It is a real-time multiplayer quiz game built with ASP.NET, React, Redux Toolkit, SignalR, and PostgreSQL. 
-### Players can join quiz rooms, chat, and compete in live trivia rounds.
-### It is containerized with Docker and deployed on Fly.io.
+## This is a full-stack AI Powered web application.
+## It is a real-time multiplayer quiz game built with ASP.NET, React, Redux Toolkit, SignalR, and PostgreSQL. 
+## Players can join quiz rooms, chat, and compete in live trivia rounds.
+## It is containerized with Docker and deployed on Fly.io.
 
 ## 🔑 Key Features
 
@@ -49,6 +49,6 @@
 4. Go to terminal and run `docker run --name devDb -e POSTGRES_USER=appuser -e POSTGRES_PASSWORD=secret -p 5432:5432 -d postgres:latest`.
 5. Now Postgres Db container should be running. *When the initial image is created you can use Docker desktop to run it. Go to Containers and run devDb.*
 6. Go to the project, cd to /API and run `dotnet watch --no-hot-reload`.
-7. Cd to E-commerce/client and run `npm start`. Now you can explore the running app on [http://localhost:3000](http://localhost:3000).
+7. Cd to SmartyParty/client and run `npm run dev`. Now you can explore the running app on [http://localhost:3000](http://localhost:3000).
 8. To test the API endpoints go to:
    - [http://localhost:5000/swagger ](http://localhost:5000/swagger/index.html)
