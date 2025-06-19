@@ -7,14 +7,18 @@ namespace Server.Services
         private static readonly List<Room> _Rooms = new();
         private static readonly List<Player> _Players = new();
 
-        public void AddPlayer(string username, string connectionId)
+        public Player AddPlayer(string username, string connectionId)
         {
             var player = new Player
             {
                 Username = username,
-                ConnectionId = connectionId
+                ConnectionId = connectionId,
+                Points = 0,
+                CurrentQuestionIndex = 0,
             };
             _Players.Add(player);
+
+            return player;
         }
 
         public static void RemovePlayer(string connectionId)
@@ -121,35 +125,16 @@ namespace Server.Services
             return foundPlayer.ConnectionId;
         }
 
-        public Player AddPlayerToRoom(string roomId, string playerUserName, string connectionId)
+        public void AddPlayerToRoom(string roomId, string playerUserName, string connectionId)
         {
-            var existingRoom = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
-
-            if (existingRoom == null) return null;
+            var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
 
             var player = _Players.FirstOrDefault(p => p.Username == playerUserName);
 
-            if (player == null)
-            {
-                var newPlayer = new Player
-                {
-                    Username = playerUserName,
-                    ConnectionId = connectionId,
-                    Points = 0,
-                    CurrentQuestionIndex = 0
-                };
-
-                _Players.Add(newPlayer);
-
-                existingRoom.Players.Add(newPlayer);
-
-                return newPlayer;
-            }
+            if (player == null) return;
 
             player.ConnectionId = connectionId;
-            existingRoom.Players.FirstOrDefault(p => p.Username == player.Username)!.ConnectionId = connectionId;
-
-            return player;
+            room.Players.Add(player);
         }
 
         public void UpdatePlayerInRoom(string roomId, string playerUserName, int questionIndex = -1, int points = 0)
@@ -164,7 +149,7 @@ namespace Server.Services
 
             if (questionIndex > -1) player.CurrentQuestionIndex = questionIndex;
 
-            if (points > 0) player.Points += points;
+            player.Points += points;
         }
 
         public void RemovePlayerFromRoom(string roomId, string playerUserName)
@@ -194,6 +179,12 @@ namespace Server.Services
             room.Messages.Add(message);
 
             return message;
+        }
+
+        public void SetGameStatus(string roomId, string status)
+        {
+            var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
+            room.GameStatus = status;
         }
 
         public void ClearAll()

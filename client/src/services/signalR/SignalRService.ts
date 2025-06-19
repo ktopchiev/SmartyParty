@@ -1,13 +1,14 @@
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from "@microsoft/signalr";
 import { store } from "../store";
 import type Room from "../../models/Room";
-import { addMessageToRoom, addPlayer, addRoomToList, removePlayer, removeRoom, setCurrentAnswer, setQuestionIndex, setRoom, setRoomsList, updatePlayer } from "../room/roomsSlice";
+import { addMessageToRoom, addPlayer, addRoomToList, removePlayer, removeRoom, setCurrentAnswer, setGameStatus, setQuestionIndex, setRoom, setRoomsList, updatePlayer } from "../room/roomsSlice";
 import type { MessageDto } from "../../models/MessageDto";
 import type { RoomRequest } from "../../models/RoomRequest";
 import type { Message } from "../../models/Room";
 import { toast } from "react-toastify";
 import type { Player } from "../../models/Player";
 import type Answer from "../../models/Answer";
+import type { GameStatus } from "../../models/GameStatus";
 
 class SignalRService {
 
@@ -60,31 +61,28 @@ class SignalRService {
         });
 
         this.signalRConnection?.on("RoomCreated", (room) => {
-            console.log("Room created:", room);
             if (this.onRoomCreatedCallback) {
                 this.onRoomCreatedCallback(room);
             }
         });
 
         this.signalRConnection?.on("ReceiveMessage", (message) => {
-            console.log("Message received:", message);
             store.dispatch(addMessageToRoom(message));
         });
 
         this.signalRConnection?.on("PlayerJoined", (player: Player) => {
+            console.log("Player joined")
             let msg: Message = {
                 roomId: "",
                 id: "",
                 from: "",
                 content: `Player <${player.username}> joined the room`,
             };
-            console.log(msg.content);
             store.dispatch(addPlayer(player));
             store.dispatch(addMessageToRoom(msg));
         });
 
         this.signalRConnection?.on("PlayerUpdated", (player: Player) => {
-            console.log("PlayerUpdated", player);
             store.dispatch(updatePlayer(player));
             store.dispatch(setQuestionIndex(player.currentQuestionIndex));
         });
@@ -96,7 +94,6 @@ class SignalRService {
                 from: "system",
                 content: `Player <${player.username}> has left the room`,
             };
-            console.log(msg.content);
             store.dispatch(removePlayer(player));
             store.dispatch(addMessageToRoom(msg));
             const room = store.getState().room.room;
@@ -106,32 +103,31 @@ class SignalRService {
         });
 
         this.signalRConnection?.on("ReceiveRoomList", (rooms) => {
-            console.log("Rooms list received:", rooms);
             store.dispatch(setRoomsList(rooms));
         });
 
         this.signalRConnection?.on("ReceiveRoom", (room: Room) => {
-            console.log("Room received:", room);
             store.dispatch(setRoom(room));
             store.dispatch(addRoomToList(room));
         });
 
         this.signalRConnection?.on("RemoveRoom", (roomId) => {
-            console.log("Room removed:", roomId);
             store.dispatch(removeRoom(roomId));
         });
 
         this.signalRConnection?.on("ReceiveAnswer", (answer: Answer) => {
-            console.log("Answer received:", answer);
             store.dispatch(setCurrentAnswer(answer));
         });
 
-        this.signalRConnection?.on("HandleError", (error: "string") => {
+        this.signalRConnection?.on("ReceiveGameStatus", (status: "init" | "start" | "stop") => {
+            store.dispatch(setGameStatus(status));
+        });
+
+        this.signalRConnection?.on("HandleError", (error: string) => {
             this.onErrorCallback?.(error);
         });
 
         this.signalRConnection?.on("AccessDenied", (message: string) => {
-            console.error(message);
             toast.warning(message);
             window.location.href = "/";
         });
@@ -162,9 +158,7 @@ class SignalRService {
                 console.error(errMsg);
                 return;
             }
-            console.log("Room request", roomRequest);
-            let roomResponse = await this.signalRConnection?.invoke("CreateRoom", roomRequest);
-            console.log("Room created successfully:", roomResponse);
+            await this.signalRConnection?.invoke("CreateRoom", roomRequest);
         } catch (error) {
             console.error("Error creating room:", error);
         }
@@ -175,7 +169,7 @@ class SignalRService {
             console.error("SignalR connection is not established.");
             return;
         }
-
+        console.log("SignalR", "joinRoom");
         try {
             await this.signalRConnection?.invoke("JoinRoom", roomId, username);
         } catch (error) {
@@ -273,6 +267,19 @@ class SignalRService {
         try {
             console.log("Sending answer to other user:", answer.id, "ConnectionId:", this.signalRConnection.connectionId, "Answer:", answer.option.content);
             await this.signalRConnection?.invoke("SendAnswer", answer);
+        } catch (error) {
+            console.error("Error sending message:", error);
+        }
+    }
+
+    public async sendGameStatus(status: GameStatus) {
+        if (!this.signalRConnection) {
+            console.error("SignalR connection is not established.");
+            return;
+        }
+        try {
+            console.log("Sending status to other user:", "Status:", status.status);
+            await this.signalRConnection?.invoke("SendGameStatus", status);
         } catch (error) {
             console.error("Error sending message:", error);
         }

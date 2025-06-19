@@ -7,9 +7,10 @@ import type { Player } from '../../models/Player';
 export interface RoomState {
     room: Room | null;
     roomsList: Room[];
+    roomsListLoaded: boolean;
     currentAnswer: Answer | null;
     status: 'idle' | 'loading' | 'ready' | 'error';
-    gameStatus: string;
+    gameStatus: 'init' | 'start' | 'stop';
     questionIndex: number;
     availability: 'open' | 'closed';
     unreadMessages: number;
@@ -18,9 +19,10 @@ export interface RoomState {
 const initialState: RoomState = {
     room: null,
     roomsList: [],
+    roomsListLoaded: false,
     currentAnswer: null,
     status: 'idle',
-    gameStatus: '',
+    gameStatus: 'init',
     questionIndex: 0,
     availability: 'open',
     unreadMessages: 0,
@@ -64,9 +66,11 @@ const roomsSlice = createSlice({
         },
         setRoomsList: (state, action: PayloadAction<Room[]>) => {
             state.roomsList = action.payload;
+            state.roomsListLoaded = true;
         },
         addRoomToList: (state, action: PayloadAction<Room>) => {
             state.roomsList = [...state.roomsList, action.payload];
+            state.roomsListLoaded = true;
         },
         resetRoom: (_state) => {
             _state = initialState;
@@ -75,6 +79,7 @@ const roomsSlice = createSlice({
             if (state.roomsList) {
                 state.roomsList = state.roomsList.filter(r => r.id !== action.payload);
                 state.availability = 'closed';
+                state.roomsListLoaded = true;
             }
         },
         setCurrentAnswer: (state, action: PayloadAction<Answer>) => {
@@ -86,6 +91,9 @@ const roomsSlice = createSlice({
         setQuestionIndex: (state, action: PayloadAction<number>) => {
             state.questionIndex = action.payload;
         },
+        setGameStatus: (state, action: PayloadAction<'init' | 'start' | 'stop'>) => {
+            state.gameStatus = action.payload;
+        }
     },
 });
 
@@ -104,5 +112,6 @@ export const {
     setCurrentAnswer,
     resetCurrentAnswer,
     setQuestionIndex,
+    setGameStatus,
 } = roomsSlice.actions;
 export default roomsSlice.reducer;

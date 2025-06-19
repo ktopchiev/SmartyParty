@@ -17,7 +17,7 @@ namespace Server.DTOs.Responses
             {
                 Id = answerRequest.Id,
                 From = answerRequest.From,
-                Option = answerRequest.Option.ToOptionResponse()
+                Option = answerRequest.Option.ToOptionResponse(),
             };
         }
     }

@@ -35,7 +35,7 @@ export default function Header() {
 
 	return (
 		<>
-			<Navbar expand="lg" bg="light" className="mb-3">
+			<Navbar expand="lg" bg="light">
 				<Container fluid>
 					<div className="d-flex flex-row">
 						<Col>
@@ -63,16 +63,16 @@ export default function Header() {
 					<Navbar.Collapse id="navbar-nav">
 						<Nav className="ms-auto">
 							{!loggedIn ? (
-								<>
-									<Button variant="outline-primary" className="my-2" onClick={() => setShowLogin(true)}>
+								<div>
+									<Button variant="outline-primary" className="m-2" onClick={() => setShowLogin(true)}>
 										Login
 									</Button>
 									<Button variant="outline-success" onClick={() => setShowRegister(true)}>
 										Register
 									</Button>
-								</>
+								</div>
 							) : (
-								<Button variant="outline-dark" className="my-2" onClick={() => setShowUserMenu(true)}>
+								<Button variant="outline-dark" className="m-2" onClick={() => setShowUserMenu(true)}>
 									{user?.username}
 								</Button>
 							)}

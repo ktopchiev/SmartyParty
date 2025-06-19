@@ -33,10 +33,11 @@ export default function CreateRoomForm() {
         { id: 8, name: "Geography" },
         { id: 10, name: "Technology" },
         { id: 11, name: "C# and .NET" },
-        { id: 12, name: "ReactJS" },
-        { id: 13, name: "OOP" },
-        { id: 14, name: "Design Patterns" },
-        { id: 15, name: "Databases" },
+        { id: 12, name: "JavaScript" },
+        { id: 13, name: "ReactJS" },
+        { id: 14, name: "OOP" },
+        { id: 15, name: "Design Patterns" },
+        { id: 16, name: "Databases" },
     ];
 
     const languages = [
@@ -59,11 +60,10 @@ export default function CreateRoomForm() {
 
     const handleCreateRoom = async (data: FormData) => {
         event?.preventDefault();
-        setIsLoading(true);
         if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
             await SignalRService.startUserRoomConnection();
         }
-
+        setIsLoading(true);
         let roomRequest = ToRoomRequest(user?.username!, data);
         try {
             await SignalRService.createRoom(roomRequest);
@@ -93,6 +93,7 @@ export default function CreateRoomForm() {
                     <Form.Control
                         type="text"
                         placeholder="Enter room name..."
+                        defaultValue="devRoom"
                         isInvalid={!!errors.roomName}
                         {...register("roomName", { required: "Room name is required" })}
                     />
@@ -112,6 +113,7 @@ export default function CreateRoomForm() {
                                     label={topic.name}
                                     id={`radioDefault${topic.id}`}
                                     value={topic.name}
+                                    checked={topic.id == 1}
                                     isInvalid={!!errors.topic}
                                     {...register("topic", { required: "Quiz topic is required" })}
                                     name="topic"

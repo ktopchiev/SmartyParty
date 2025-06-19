@@ -38,7 +38,7 @@ export default function ChatWindow({ roomId }: Props) {
 			<Card.Body className="bg-white rounded mb-2" style={{ height: "60vh", overflowY: "auto" }}>
 				{room?.messages?.map((msg) => (
 					<Container
-						key={msg.id}
+						key={msg.id + msg.from}
 						className={`d-flex mb-2 ${msg.from === user?.username ? "justify-content-end" : "justify-content-start"}`}
 					>
 						<div
@@ -52,6 +52,7 @@ export default function ChatWindow({ roomId }: Props) {
 								fontWeight: 500,
 								wordWrap: "break-word"
 							}}
+							key={msg.id}
 						>
 							{msg.content}
 						</div>

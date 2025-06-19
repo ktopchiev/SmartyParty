@@ -31,4 +31,5 @@ export default interface Room {
     players: Player[] | [];
     messages: Message[];
     questions: Question[];
+    allPlayersAnswered: boolean;
 }

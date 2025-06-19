@@ -55,7 +55,7 @@ function App() {
 		<div>
 			<ToastContainer position="bottom-right" hideProgressBar={true} transition={Slide} autoClose={3000} theme="colored" />
 			<Header />
-			<div style={{ minHeight: "100vh" }}>
+			<div>
 				<Outlet />
 			</div>
 			<footer>

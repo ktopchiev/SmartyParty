@@ -52,6 +52,21 @@ public class ConnectionUserHub : Hub
         await Clients.Group(messageRequest.RoomId).SendAsync("ReceiveMessage", message.ToMessageResponse());
     }
 
+    public async Task SendGameStatus(GameStatusRequest gameStatusRequest)
+    {
+        if (string.IsNullOrWhiteSpace(gameStatusRequest.RoomId) || string.IsNullOrWhiteSpace(gameStatusRequest.Status))
+        {
+            throw new HubException("Invalid status");
+        }
+
+        if (_userConnectionService.GetRoomById(gameStatusRequest.RoomId) == null)
+        {
+            throw new HubException("Room not found");
+        }
+
+        await Clients.Group(gameStatusRequest.RoomId).SendAsync("ReceiveGameStatus", gameStatusRequest.Status);
+    }
+
     public async Task UpdatePlayer(string roomId, PlayerDto player)
     {
         if (string.IsNullOrEmpty(player.Username))
@@ -115,14 +130,20 @@ public class ConnectionUserHub : Hub
             throw new HubException("Invalid room ID or username");
         }
 
-        var player = _userConnectionService.AddPlayerToRoom(roomId, username, Context.ConnectionId);
-
-        if (player == null)
+        if (_userConnectionService.GetRoomById(roomId) == null)
         {
             throw new HubException("Room does not exist");
         }
 
-        await Clients.Group(roomId).SendAsync("PlayerJoined", player.ToPlayerDto());
+        var player = _userConnectionService.GetPlayerByUsername(username);
+
+        if (player == null)
+        {
+            var newPlayer = _userConnectionService.AddPlayer(username, Context.ConnectionId);
+            await Clients.Group(roomId).SendAsync("PlayerJoined", newPlayer.ToPlayerDto());
+            _userConnectionService.AddPlayerToRoom(roomId, username, Context.ConnectionId);
+        }
+
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
     }
 
@@ -134,7 +155,7 @@ public class ConnectionUserHub : Hub
             throw new HubException("Invalid room ID");
         }
 
-        var player = _userConnectionService.GetPlayerInRoomByConnectionId(roomId, Context.ConnectionId);
+        var player = _userConnectionService.GetPlayerInRoomByUsername(roomId, playerName);
         if (player == null)
         {
             throw new HubException("Player doesn't exist in this room");

@@ -7,7 +7,7 @@ import { HubConnectionState } from "@microsoft/signalr";
 import type { Option } from "../models/Room";
 import { toast } from "react-toastify";
 import type Answer from "../models/Answer";
-import { resetCurrentAnswer, setStatus } from "../services/room/roomsSlice";
+import { setStatus } from "../services/room/roomsSlice";
 import ChatUI from "../components/chat/ChatUI";
 
 import {
@@ -20,21 +20,19 @@ import {
 	ListGroup,
 	Card,
 } from "react-bootstrap";
+import Loading from "../components/Loading";
 
-const timer = 30;
+const timer = 20;
 
 const QuizRoomPage: React.FC = () => {
 	const [final, setFinal] = useState<boolean>(false);
 	const [selected, setSelected] = useState<number | null>(null);
 	const [showAnswer, setShowAnswer] = useState(false);
 	const [countdown, setCountdown] = useState(timer);
-	const [gameStart, setGameStart] = useState<boolean>(false);
 	const { roomId } = useParams<{ roomId: string }>();
 	const id = roomId!;
 	const { user } = useAppSelector((state) => state.user);
-	const { room, status, currentAnswer, questionIndex, availability } = useAppSelector(
-		(state) => state.room
-	);
+	const { room, status, currentAnswer, questionIndex, availability, gameStatus } = useAppSelector((state) => state.room);
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
 
@@ -43,7 +41,7 @@ const QuizRoomPage: React.FC = () => {
 	}, [room?.players]);
 
 	useEffect(() => {
-		if (gameStart) {
+		if (gameStatus === "start") {
 			setCountdown(timer);
 			const interval = setInterval(() => {
 				setCountdown((prev) => {
@@ -67,7 +65,7 @@ const QuizRoomPage: React.FC = () => {
 			}, 1000);
 			return () => clearInterval(interval);
 		}
-	}, [questionIndex, timer, gameStart]);
+	}, [questionIndex, timer, gameStatus]);
 
 	useEffect(() => {
 
@@ -77,16 +75,14 @@ const QuizRoomPage: React.FC = () => {
 		});
 
 		const fetchRoom = async () => {
-
-			if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
+			dispatch(setStatus('loading'));
+			if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
 				await SignalRService.startUserRoomConnection();
 			}
 
 			await SignalRService.getRoom(id, player?.username!);
-
 		};
 
-		dispatch(setStatus('loading'));
 		fetchRoom();
 	}, []);
 
@@ -120,7 +116,7 @@ const QuizRoomPage: React.FC = () => {
 	}, [availability]);
 
 	const handleLeaveRoom = async () => {
-		if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
+		if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
 			await SignalRService.startUserRoomConnection();
 		}
 		await SignalRService.leaveRoom(id, user?.username!);
@@ -133,7 +129,7 @@ const QuizRoomPage: React.FC = () => {
 		setSelected(index);
 		setShowAnswer(true);
 
-		if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
+		if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
 			await SignalRService.startUserRoomConnection();
 		}
 
@@ -152,21 +148,8 @@ const QuizRoomPage: React.FC = () => {
 		await SignalRService.sendAnswer(answer);
 	};
 
-	const onNext = async () => {
-		setSelected(null);
-		setShowAnswer(false);
-		if (questionIndex + 1 < room?.questions.length!) {
-			if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
-				await SignalRService.startUserRoomConnection();
-			}
-			console.log("Question index before", questionIndex);
-			await SignalRService.updatePlayer(id, {
-				username: user?.username!,
-				points: 0,
-				currentQuestionIndex: questionIndex + 1,
-			});
-			dispatch(resetCurrentAnswer());
-		}
+	const start = async () => {
+		await SignalRService.sendGameStatus({ roomId: id, status: "start" });
 	};
 
 	const onHintClick = () => {
@@ -189,7 +172,7 @@ const QuizRoomPage: React.FC = () => {
 		);
 	}
 
-	if (status === 'loading') return <div>Loading...</div>
+	if (status === 'loading') return <Loading />
 
 	return (
 		<Container fluid="md" className="mt-2 bg-light text-dark" style={{ minHeight: "90vh", maxWidth: "1200px" }}>
@@ -272,7 +255,7 @@ const QuizRoomPage: React.FC = () => {
 											action
 											onClick={() => handleSelect(opt, idx)}
 											active={isSelected}
-											disabled={showAnswer || countdown === 0}
+											disabled={showAnswer || countdown === 0 || gameStatus !== "start"}
 											variant={variant}
 											className="position-relative d-flex justify-content-between align-items-center my-2 rounded"
 											style={{ cursor: showAnswer ? "default" : "pointer" }}
@@ -285,14 +268,16 @@ const QuizRoomPage: React.FC = () => {
 							</ListGroup>
 
 							<Row className="text-center mt-4">
-								<Button
-									variant="btn btn-warning"
-									disabled={!showAnswer}
-									onClick={onNext}
-									className="fw-semibold"
-								>
-									Next
-								</Button>
+								{room?.creator === user?.username &&
+									(<Button
+										variant="btn btn-success"
+										disabled={room?.players.length! < 2}
+										onClick={() => start()}
+										className="fw-semibold"
+										style={{ display: gameStatus !== "init" ? "none" : "block" }}
+									>
+										Start
+									</Button>)}
 							</Row>
 						</Card.Body>
 					</Card>

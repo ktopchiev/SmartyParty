@@ -14,7 +14,6 @@ import QuizRoomPage from './features/QuizRoomPage.tsx';
 import { FinalPage } from './features/FinalPage.tsx';
 import NotFoundPage from './features/NotFoundPage.tsx';
 import ServerError from './errors/ServerError.tsx';
-import { StrictMode } from 'react';
 
 createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
