@@ -18,6 +18,7 @@ export default function Header() {
 	const [showLogin, setShowLogin] = useState(false);
 	const [showRegister, setShowRegister] = useState(false);
 	const [showUserMenu, setShowUserMenu] = useState(false);
+	const [expanded, setExpanded] = useState(false);
 
 	const handleLogout = () => {
 		dispatch(setLogOut());
@@ -33,9 +34,14 @@ export default function Header() {
 		if (room) setShowUserMenu(false);
 	}, [loggedIn, registered, room])
 
+	const handleClickNavBtn = (setFn: any) => {
+		setFn(true);
+		setExpanded(false);
+	}
+
 	return (
 		<>
-			<Navbar expand="lg" bg="light">
+			<Navbar expand="lg" expanded={expanded} bg="light">
 				<Container fluid>
 					<div className="d-flex flex-row">
 						<Col>
@@ -59,20 +65,20 @@ export default function Header() {
 						Conn
 					</Button>
 
-					<Navbar.Toggle aria-controls="navbar-nav" />
+					<Navbar.Toggle aria-controls="navbar-nav" onClick={() => setExpanded(!expanded)} />
 					<Navbar.Collapse id="navbar-nav">
 						<Nav className="ms-auto">
 							{!loggedIn ? (
 								<div>
-									<Button variant="outline-primary" className="m-2" onClick={() => setShowLogin(true)}>
+									<Button variant="outline-primary" className="m-2" onClick={() => handleClickNavBtn(setShowLogin)}>
 										Login
 									</Button>
-									<Button variant="outline-success" onClick={() => setShowRegister(true)}>
+									<Button variant="outline-success" onClick={() => handleClickNavBtn(setShowRegister)}>
 										Register
 									</Button>
 								</div>
 							) : (
-								<Button variant="outline-dark" className="m-2" onClick={() => setShowUserMenu(true)}>
+								<Button variant="outline-dark" className="m-2" onClick={() => handleClickNavBtn(setShowUserMenu)}>
 									{user?.username}
 								</Button>
 							)}
