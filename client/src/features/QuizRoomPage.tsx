@@ -9,7 +9,11 @@ import { toast } from "react-toastify";
 import type Answer from "../models/Answer";
 import { setStatus } from "../services/room/roomsSlice";
 import ChatUI from "../components/chat/ChatUI";
-
+import Loading from "../components/Loading";
+import type { GameStatus } from "../models/GameStatus";
+import type { Player } from "../models/Player";
+import { useRoomTimer } from "../hooks/useRoomTimer";
+import AnimatedTimer from "../components/quiz-room/AnimatedTimer";
 import {
 	Container,
 	Row,
@@ -20,53 +24,36 @@ import {
 	ListGroup,
 	Card,
 } from "react-bootstrap";
-import Loading from "../components/Loading";
-import type { GameStatus } from "../models/GameStatus";
-import type { Player } from "../models/Player";
-
-const timer = 20;
 
 const QuizRoomPage: React.FC = () => {
+
 	const [selected, setSelected] = useState<number | null>(null);
 	const [showAnswer, setShowAnswer] = useState(false);
-	const [countdown, setCountdown] = useState(timer);
+
 	const { roomId } = useParams<{ roomId: string }>();
-	const id = roomId!;
+	const navigate = useNavigate();
+
+	const { timeLeft, hasEnded, startTimer } = useRoomTimer(roomId!, false);
+
 	const { user } = useAppSelector((state) => state.user);
 	const { room, status, currentAnswer, questionIndex, availability, gameStatus } = useAppSelector((state) => state.room);
 	const dispatch = useAppDispatch();
-	const navigate = useNavigate();
+
+	const timer = 30;
 
 	const player = useMemo(() => {
 		return room?.players.find((p) => p.username === user?.username);
 	}, [room?.players]);
 
 	useEffect(() => {
-		if (gameStatus === "start") {
-			setCountdown(timer);
-
-			const interval = setInterval(() => {
-
-				setCountdown((prev) => {
-					if (prev <= 1) {
-						clearInterval(interval);
-						if (questionIndex + 1 < (room?.questions.length || 0)) {
-							updatePlayer();
-						} else {
-							updateGameStatus();
-						}
-
-						return 0;
-					}
-
-					return prev - 1;
-				});
-
-			}, 1000);
-
-			return () => clearInterval(interval);
+		if (questionIndex + 1 < (room?.questions.length || 0)) {
+			updatePlayer();
 		}
-	}, [questionIndex, timer, gameStatus]);
+
+		if (hasEnded) {
+			setGameFinale();
+		}
+	}, [questionIndex, hasEnded]);
 
 	const updatePlayer = async () => {
 		const updatedPlayer = {
@@ -76,12 +63,12 @@ const QuizRoomPage: React.FC = () => {
 			points: player?.points ?? 0,
 		};
 
-		await SignalRService.updatePlayer(id, updatedPlayer);
+		await SignalRService.updatePlayer(roomId!, updatedPlayer);
 	};
 
-	const updateGameStatus = async () => {
+	const setGameFinale = async () => {
 		const gameStatus: GameStatus = {
-			roomId: id,
+			roomId: roomId!,
 			status: "finale",
 		};
 
@@ -101,7 +88,7 @@ const QuizRoomPage: React.FC = () => {
 				await SignalRService.startUserRoomConnection();
 			}
 
-			await SignalRService.getRoom(id, player?.username!);
+			await SignalRService.getRoom(roomId!, player?.username!);
 		};
 
 		fetchRoom();
@@ -110,7 +97,7 @@ const QuizRoomPage: React.FC = () => {
 	useEffect(() => {
 
 		const joinRoom = async () => {
-			await SignalRService.joinRoom(id, user?.username!);
+			await SignalRService.joinRoom(roomId!, user?.username!);
 		}
 
 		if (status === 'ready') joinRoom();
@@ -119,10 +106,10 @@ const QuizRoomPage: React.FC = () => {
 	useEffect(() => {
 		const endGame = async () => {
 			if (gameStatus === "finale") {
-				await SignalRService.removeRoom(id);
+				await SignalRService.removeRoom(roomId!);
 				SignalRService.stopUserRoomConnection();
 
-				gameStatus === "finale" && navigate(`/quizroom/${id}/finalе`);
+				gameStatus === "finale" && navigate(`/quizroom/${roomId!}/finalе`);
 			}
 		};
 
@@ -140,7 +127,7 @@ const QuizRoomPage: React.FC = () => {
 		if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
 			await SignalRService.startUserRoomConnection();
 		}
-		await SignalRService.leaveRoom(id, user?.username!);
+		await SignalRService.leaveRoom(roomId!, user?.username!);
 		navigate("/");
 	};
 
@@ -159,11 +146,11 @@ const QuizRoomPage: React.FC = () => {
 			currentQuestionIndex: questionIndex,
 		}
 
-		await SignalRService.updatePlayer(id, player);
+		await SignalRService.updatePlayer(roomId!, player);
 
 		const answer: Answer = {
 			id: _option.id,
-			roomId: id,
+			roomId: roomId!,
 			from: user?.username ?? "",
 			option: _option,
 		};
@@ -172,13 +159,14 @@ const QuizRoomPage: React.FC = () => {
 
 	};
 
-	const handleStart = async () => {
+	const handleStart = async (timerSeconds: number) => {
 		const gameStatus: GameStatus = {
-			roomId: id,
+			roomId: roomId!,
 			status: "start",
 		};
 
 		await SignalRService.sendGameStatus(gameStatus);
+		startTimer(timerSeconds);
 	};
 
 	const onHintClick = () => {
@@ -249,9 +237,9 @@ const QuizRoomPage: React.FC = () => {
 							now={((room?.questions[questionIndex]?.id! / (room?.numberOfQuestions || 1)) * 100) || 0}
 							variant="warning"
 						/>
-						<Badge bg="dark" className="rounded-circle p-2" style={{ minWidth: "50px", textAlign: "center" }}>
-							{countdown}
-						</Badge>
+
+						{/* Timer */}
+						<AnimatedTimer seconds={timeLeft} hasEnded={hasEnded} />
 					</div>
 
 					<Card className="shadow-lg rounded-4 border-0 bg-light text-dark border-dark">
@@ -284,7 +272,7 @@ const QuizRoomPage: React.FC = () => {
 											action
 											onClick={() => handleSelect(opt, idx)}
 											active={isSelected}
-											disabled={showAnswer || countdown === 0 || gameStatus !== "start"}
+											disabled={showAnswer || timeLeft === 0 || gameStatus !== "start"}
 											variant={variant}
 											className="position-relative d-flex justify-content-between align-items-center my-2 rounded"
 											style={{ cursor: showAnswer ? "default" : "pointer" }}
@@ -301,7 +289,7 @@ const QuizRoomPage: React.FC = () => {
 									(<Button
 										variant="btn btn-success"
 										disabled={(room?.players.length ?? 0) < 2}
-										onClick={() => handleStart()}
+										onClick={() => handleStart(timer)}
 										className="fw-semibold"
 										style={{ display: gameStatus !== "init" ? "none" : "block" }}
 									>

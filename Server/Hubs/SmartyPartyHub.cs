@@ -5,13 +5,13 @@ using Server.DTOs.Responses;
 using Server.Models;
 using Server.Services;
 
-public class ConnectionUserHub : Hub
+public class SmartyPartyHub : Hub
 {
     private readonly UserConnectionService _userConnectionService;
     private readonly AIQuestionService _aiQuestionService;
     private readonly TimerService _timerService;
 
-    public ConnectionUserHub(UserConnectionService userConnectionService, AIQuestionService aIQuestionService, TimerService timerService)
+    public SmartyPartyHub(UserConnectionService userConnectionService, AIQuestionService aIQuestionService, TimerService timerService)
     {
         _userConnectionService = userConnectionService;
         _aiQuestionService = aIQuestionService;
@@ -75,15 +75,15 @@ public class ConnectionUserHub : Hub
         await Clients.Group(gameStatusRequest.RoomId).SendAsync("ReceiveGameStatus", gameStatusRequest.Status);
     }
 
-    public async Task StartGame(string roomId)
+    public async Task StartTimer(string roomId, int durationInSeconds)
     {
         if (_userConnectionService.GetRoomById(roomId) == null)
         {
             throw new HubException("Room not found");
         }
 
-        _timerService.
-
+        _timerService.StartTimer(roomId, durationInSeconds);
+        await Clients.Group(roomId).SendAsync("TimerStarted", durationInSeconds);
     }
 
     public async Task UpdatePlayer(string roomId, PlayerDto player)

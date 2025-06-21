@@ -50,7 +50,7 @@ builder.Services.AddDbContext<SmartyPartyDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddSignalR()
-.AddHubOptions<ConnectionUserHub>(options =>
+.AddHubOptions<SmartyPartyHub>(options =>
 {
     options.EnableDetailedErrors = true;
     options.MaximumReceiveMessageSize = 1024000; // 1 MB
@@ -102,7 +102,7 @@ app.UseAuthorization();
 
 
 app.MapUserEndpoints();
-app.MapHub<ConnectionUserHub>("/hubs/connectionuser");
+app.MapHub<SmartyPartyHub>("/hubs/smartyparty");
 
 var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<SmartyPartyDbContext>();

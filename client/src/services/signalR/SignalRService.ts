@@ -13,13 +13,13 @@ import type { GameStatus } from "../../models/GameStatus";
 class SignalRService {
 
     private signalRConnection: HubConnection | null = null;
-    private baseUrl: string = import.meta.env.VITE_APP_HUBS_URL;
+    private hubUrl: string = import.meta.env.VITE_APP_HUBS_URL;
     private onRoomCreatedCallback: ((room: Room) => void) | null = null;
     private onErrorCallback: ((error: string) => void) | null = null;
 
     constructor() {
         this.signalRConnection = new HubConnectionBuilder()
-            .withUrl(`${this.baseUrl}connectionuser`)
+            .withUrl(this.hubUrl)
             .configureLogging("Information")
             .withAutomaticReconnect()
             .build();
@@ -37,7 +37,7 @@ class SignalRService {
 
     public async startUserRoomConnection() {
 
-        if (this.signalRConnection?.state === HubConnectionState.Connected) return;
+        if (this.signalRConnection?.state === HubConnectionState.Connected || this.signalRConnection?.state === HubConnectionState.Connecting) return;
 
         this.signalRConnection?.on("UserConnected", () => {
             console.log("Server called here");
@@ -109,6 +109,7 @@ class SignalRService {
         this.signalRConnection?.on("ReceiveRoom", (room: Room) => {
             store.dispatch(setRoom(room));
             store.dispatch(addRoomToList(room));
+            store.dispatch(setGameStatus('init'));
         });
 
         this.signalRConnection?.on("RoomRemoved", (roomId) => {
@@ -282,6 +283,20 @@ class SignalRService {
             await this.signalRConnection?.invoke("SendGameStatus", status);
         } catch (error) {
             console.error("Error sending message:", error);
+        }
+    }
+
+    public async startTimer(roomId: string, seconds: number) {
+        if (!this.signalRConnection) {
+            console.error("SignalR connection is not established.");
+            return;
+        }
+
+        try {
+            await this.signalRConnection.invoke("StartTimer", roomId, seconds);
+            console.log(`Timer started for room ${roomId} with ${seconds} seconds.`);
+        } catch (error) {
+            console.error("Error starting timer:", error);
         }
     }
 
