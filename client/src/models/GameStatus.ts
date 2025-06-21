@@ -1,4 +1,4 @@
 export interface GameStatus {
   roomId: string;
-  status: string;
+  status: "init" | "start" | "stop" | "finale";
 }

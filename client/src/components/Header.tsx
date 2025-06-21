@@ -1,4 +1,3 @@
-// components/Header.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, NavLink as RouterNavLink } from "react-router";
 import { useAppDispatch, useAppSelector } from "../services/store";
@@ -52,6 +51,7 @@ export default function Header() {
 							<p style={{ fontSize: "10px", margin: 0, padding: 0, fontWeight: "bold", color: "purple" }}>AI Powered</p>
 						</Col>
 					</div>
+					{}
 					<Button
 						variant="warning"
 						size="sm"

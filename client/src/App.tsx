@@ -25,7 +25,7 @@ function App() {
 
 		const startConnection = async () => {
 			try {
-				if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
+				if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
 					await SignalRService.startUserRoomConnection();
 				}
 			} catch (err) {

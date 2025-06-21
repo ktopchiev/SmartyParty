@@ -9,11 +9,13 @@ public class ConnectionUserHub : Hub
 {
     private readonly UserConnectionService _userConnectionService;
     private readonly AIQuestionService _aiQuestionService;
+    private readonly TimerService _timerService;
 
-    public ConnectionUserHub(UserConnectionService userConnectionService, AIQuestionService aIQuestionService)
+    public ConnectionUserHub(UserConnectionService userConnectionService, AIQuestionService aIQuestionService, TimerService timerService)
     {
         _userConnectionService = userConnectionService;
         _aiQuestionService = aIQuestionService;
+        _timerService = timerService;
     }
 
     public override async Task OnConnectedAsync()
@@ -30,6 +32,9 @@ public class ConnectionUserHub : Hub
 
     public async Task SendAnswer(AnswerRequest answer)
     {
+        //Remove this delay in production
+        await Task.Delay(2000);
+
         if (string.IsNullOrWhiteSpace(answer.From) || string.IsNullOrWhiteSpace(answer.RoomId) || answer.Option == null)
         {
             throw new HubException("Invalid answer");
@@ -43,6 +48,9 @@ public class ConnectionUserHub : Hub
 
     public async Task SendMessage(MessageRequest messageRequest)
     {
+        //Remove this delay in production
+        await Task.Delay(2000);
+
         if (string.IsNullOrWhiteSpace(messageRequest.RoomId) || string.IsNullOrWhiteSpace(messageRequest.From) || string.IsNullOrWhiteSpace(messageRequest.Content))
         {
             throw new HubException("Invalid message");
@@ -67,6 +75,17 @@ public class ConnectionUserHub : Hub
         await Clients.Group(gameStatusRequest.RoomId).SendAsync("ReceiveGameStatus", gameStatusRequest.Status);
     }
 
+    public async Task StartGame(string roomId)
+    {
+        if (_userConnectionService.GetRoomById(roomId) == null)
+        {
+            throw new HubException("Room not found");
+        }
+
+        _timerService.
+
+    }
+
     public async Task UpdatePlayer(string roomId, PlayerDto player)
     {
         if (string.IsNullOrEmpty(player.Username))
@@ -80,12 +99,15 @@ public class ConnectionUserHub : Hub
 
     public async Task CreateRoom(RoomRequest roomRequest)
     {
+        //Remove this delay in production
+        await Task.Delay(2000);
+
         var player = roomRequest.Username;
         var roomName = roomRequest.RoomName;
         var topic = roomRequest.Topic;
-        var language = roomRequest.Language;
-        var number = roomRequest.Number;
-        var difficulty = roomRequest.Difficulty;
+        var language = roomRequest.Language ?? "";
+        var number = roomRequest.Number ?? "";
+        var difficulty = roomRequest.Difficulty ?? "";
 
         if (string.IsNullOrWhiteSpace(player) || string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(topic))
         {
@@ -125,6 +147,9 @@ public class ConnectionUserHub : Hub
 
     public async Task JoinRoom(string roomId, string username)
     {
+        //Remove this delay in production
+        await Task.Delay(2000);
+
         if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(username))
         {
             throw new HubException("Invalid room ID or username");
@@ -203,6 +228,9 @@ public class ConnectionUserHub : Hub
 
     public async Task RemoveRoom(string roomId)
     {
+        //Remove this delay in production
+        await Task.Delay(2000);
+
         if (string.IsNullOrWhiteSpace(roomId))
         {
             throw new HubException("Invalid room ID");
@@ -210,7 +238,7 @@ public class ConnectionUserHub : Hub
 
         _userConnectionService.RemoveRoom(roomId);
 
-        await Clients.All.SendAsync("RemoveRoom", roomId);
+        await Clients.All.SendAsync("RoomRemoved", roomId);
     }
 
 }

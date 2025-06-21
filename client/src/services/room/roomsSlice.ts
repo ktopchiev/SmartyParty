@@ -3,6 +3,8 @@ import type Room from '../../models/Room';
 import type { Message } from '../../models/Room';
 import type Answer from '../../models/Answer';
 import type { Player } from '../../models/Player';
+import type { GameStatus } from '../../models/GameStatus';
+
 
 export interface RoomState {
     room: Room | null;
@@ -10,7 +12,7 @@ export interface RoomState {
     roomsListLoaded: boolean;
     currentAnswer: Answer | null;
     status: 'idle' | 'loading' | 'ready' | 'error';
-    gameStatus: 'init' | 'start' | 'stop';
+    gameStatus: GameStatus["status"];
     questionIndex: number;
     availability: 'open' | 'closed';
     unreadMessages: number;
@@ -35,6 +37,7 @@ const roomsSlice = createSlice({
         setRoom: (state, action: PayloadAction<Room>) => {
             state.room = action.payload;
             state.status = 'ready';
+            state.availability = 'open';
         },
         setStatus: (state, action: PayloadAction<'idle' | 'loading' | 'ready' | 'error'>) => {
             state.status = action.payload;
@@ -91,7 +94,7 @@ const roomsSlice = createSlice({
         setQuestionIndex: (state, action: PayloadAction<number>) => {
             state.questionIndex = action.payload;
         },
-        setGameStatus: (state, action: PayloadAction<'init' | 'start' | 'stop'>) => {
+        setGameStatus: (state, action: PayloadAction<GameStatus["status"]>) => {
             state.gameStatus = action.payload;
         }
     },

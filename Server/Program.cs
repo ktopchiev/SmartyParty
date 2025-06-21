@@ -43,6 +43,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<AIQuestionService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddSingleton<UserConnectionService>();
+builder.Services.AddSingleton<TimerService>();
 
 builder.Services.AddDbContext<SmartyPartyDbContext>(options =>
 

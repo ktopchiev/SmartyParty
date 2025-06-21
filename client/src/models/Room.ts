@@ -28,7 +28,7 @@ export default interface Room {
     status: string; // "Open" | "Locked"
     numberOfQuestions: number;
     difficulty: string;
-    players: Player[] | [];
+    players: Player[];
     messages: Message[];
     questions: Question[];
     allPlayersAnswered: boolean;

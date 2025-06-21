@@ -21,11 +21,12 @@ import {
 	Card,
 } from "react-bootstrap";
 import Loading from "../components/Loading";
+import type { GameStatus } from "../models/GameStatus";
+import type { Player } from "../models/Player";
 
 const timer = 20;
 
 const QuizRoomPage: React.FC = () => {
-	const [final, setFinal] = useState<boolean>(false);
 	const [selected, setSelected] = useState<number | null>(null);
 	const [showAnswer, setShowAnswer] = useState(false);
 	const [countdown, setCountdown] = useState(timer);
@@ -43,29 +44,49 @@ const QuizRoomPage: React.FC = () => {
 	useEffect(() => {
 		if (gameStatus === "start") {
 			setCountdown(timer);
+
 			const interval = setInterval(() => {
+
 				setCountdown((prev) => {
 					if (prev <= 1) {
 						clearInterval(interval);
-						if (questionIndex + 1 < room?.questions.length!) {
-							const updatedPlayer = {
-								...player,
-								username: user?.username!,
-								currentQuestionIndex: questionIndex! + 1,
-								points: player?.points ?? 0,
-							};
-							SignalRService.updatePlayer(id, updatedPlayer);
+						if (questionIndex + 1 < (room?.questions.length || 0)) {
+							updatePlayer();
 						} else {
-							setFinal(true);
+							updateGameStatus();
 						}
+
 						return 0;
 					}
+
 					return prev - 1;
 				});
+
 			}, 1000);
+
 			return () => clearInterval(interval);
 		}
 	}, [questionIndex, timer, gameStatus]);
+
+	const updatePlayer = async () => {
+		const updatedPlayer = {
+			...player,
+			username: user?.username!,
+			currentQuestionIndex: questionIndex + 1,
+			points: player?.points ?? 0,
+		};
+
+		await SignalRService.updatePlayer(id, updatedPlayer);
+	};
+
+	const updateGameStatus = async () => {
+		const gameStatus: GameStatus = {
+			roomId: id,
+			status: "finale",
+		};
+
+		await SignalRService.sendGameStatus(gameStatus);
+	};
 
 	useEffect(() => {
 
@@ -97,16 +118,16 @@ const QuizRoomPage: React.FC = () => {
 
 	useEffect(() => {
 		const endGame = async () => {
-			if (room?.players.length! < 1 || final) {
+			if (gameStatus === "finale") {
 				await SignalRService.removeRoom(id);
 				SignalRService.stopUserRoomConnection();
 
-				final && navigate(`/quizroom/${id}/final`);
+				gameStatus === "finale" && navigate(`/quizroom/${id}/finalе`);
 			}
 		};
 
 		endGame();
-	}, [final, room?.players]);
+	}, [gameStatus, room?.players]);
 
 	useEffect(() => {
 		if (availability === 'closed') {
@@ -120,7 +141,6 @@ const QuizRoomPage: React.FC = () => {
 			await SignalRService.startUserRoomConnection();
 		}
 		await SignalRService.leaveRoom(id, user?.username!);
-		console.log("Left room:", id);
 		navigate("/");
 	};
 
@@ -133,11 +153,13 @@ const QuizRoomPage: React.FC = () => {
 			await SignalRService.startUserRoomConnection();
 		}
 
-		await SignalRService.updatePlayer(id, {
-			username: user?.username!,
+		const player: Player = {
+			username: user?.username ?? "",
 			points: _option.isCorrect ? 10 : 0,
 			currentQuestionIndex: questionIndex,
-		});
+		}
+
+		await SignalRService.updatePlayer(id, player);
 
 		const answer: Answer = {
 			id: _option.id,
@@ -145,11 +167,18 @@ const QuizRoomPage: React.FC = () => {
 			from: user?.username ?? "",
 			option: _option,
 		};
+
 		await SignalRService.sendAnswer(answer);
+
 	};
 
-	const start = async () => {
-		await SignalRService.sendGameStatus({ roomId: id, status: "start" });
+	const handleStart = async () => {
+		const gameStatus: GameStatus = {
+			roomId: id,
+			status: "start",
+		};
+
+		await SignalRService.sendGameStatus(gameStatus);
 	};
 
 	const onHintClick = () => {
@@ -271,8 +300,8 @@ const QuizRoomPage: React.FC = () => {
 								{room?.creator === user?.username &&
 									(<Button
 										variant="btn btn-success"
-										disabled={room?.players.length! < 2}
-										onClick={() => start()}
+										disabled={(room?.players.length ?? 0) < 2}
+										onClick={() => handleStart()}
 										className="fw-semibold"
 										style={{ display: gameStatus !== "init" ? "none" : "block" }}
 									>

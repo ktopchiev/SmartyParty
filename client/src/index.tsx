@@ -22,7 +22,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<App />} >
           <Route index element={<HomePage />} />
           <Route path="quizroom/:roomId" element={<QuizRoomPage />} />
-          <Route path="quizroom/:roomId/final" element={<FinalPage />} />
+          <Route path="quizroom/:roomId/finale" element={<FinalPage />} />
           <Route path="/server-error" element={<ServerError />} />
           <Route path="/not-found" element={<NotFoundPage />} />
         </Route>

@@ -4,12 +4,9 @@ import SignalRService from "../services/signalR/SignalRService";
 import { HubConnectionState } from "@microsoft/signalr";
 import { useNavigate } from "react-router";
 import type Room from "../models/Room";
-
 import { Container, Table, Button, Spinner } from "react-bootstrap";
 import CreateRoomForm from "../components/CreateRoomForm";
 import Loading from "../components/Loading";
-import { useDispatch } from "react-redux";
-import { setStatus } from "../services/room/roomsSlice";
 
 export type FormData = {
 	roomName: string;
@@ -92,6 +89,7 @@ export default function HomePage() {
 			<div>
 				<h2 className="text-center">Rooms</h2>
 				{!loggedIn && <h5 className="text-center mark">Please log in to create or join rooms.</h5>}
+				{!roomsListLoaded && <Loading />}
 				<Table striped hover size="sm">
 					<thead>
 						<tr>
@@ -103,7 +101,6 @@ export default function HomePage() {
 						</tr>
 					</thead>
 					<tbody>
-						{!roomsListLoaded && <Loading />}
 						{roomsList?.map((room: Room) => (
 							<tr key={room.id}>
 								<td>{room.name}</td>
@@ -133,6 +130,7 @@ export default function HomePage() {
 											variant="warning"
 											type="submit"
 											onClick={() => handleJoinRoom(room.id)}
+											disabled={!loggedIn}
 										>
 											Join
 										</Button>

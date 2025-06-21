@@ -111,7 +111,7 @@ class SignalRService {
             store.dispatch(addRoomToList(room));
         });
 
-        this.signalRConnection?.on("RemoveRoom", (roomId) => {
+        this.signalRConnection?.on("RoomRemoved", (roomId) => {
             store.dispatch(removeRoom(roomId));
         });
 
@@ -119,7 +119,7 @@ class SignalRService {
             store.dispatch(setCurrentAnswer(answer));
         });
 
-        this.signalRConnection?.on("ReceiveGameStatus", (status: "init" | "start" | "stop") => {
+        this.signalRConnection?.on("ReceiveGameStatus", (status: "init" | "start" | "stop" | "finale") => {
             store.dispatch(setGameStatus(status));
         });
 

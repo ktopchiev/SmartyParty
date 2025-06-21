@@ -60,7 +60,8 @@ export default function CreateRoomForm() {
 
     const handleCreateRoom = async (data: FormData) => {
         event?.preventDefault();
-        if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
+
+        if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
             await SignalRService.startUserRoomConnection();
         }
         setIsLoading(true);
