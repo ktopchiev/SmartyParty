@@ -10,24 +10,14 @@ export interface RoomState {
     room: Room | null;
     roomsList: Room[];
     roomsListLoaded: boolean;
-    currentAnswer: Answer | null;
     status: 'idle' | 'loading' | 'ready' | 'error';
-    gameStatus: GameStatus["status"];
-    questionIndex: number;
-    availability: 'open' | 'closed';
-    unreadMessages: number;
 }
 
 const initialState: RoomState = {
     room: null,
     roomsList: [],
     roomsListLoaded: false,
-    currentAnswer: null,
     status: 'idle',
-    gameStatus: 'init',
-    questionIndex: 0,
-    availability: 'open',
-    unreadMessages: 0,
 };
 
 const roomsSlice = createSlice({
@@ -37,7 +27,7 @@ const roomsSlice = createSlice({
         setRoom: (state, action: PayloadAction<Room>) => {
             state.room = action.payload;
             state.status = 'ready';
-            state.availability = 'open';
+            state.room.availability = 'open';
         },
         setStatus: (state, action: PayloadAction<'idle' | 'loading' | 'ready' | 'error'>) => {
             state.status = action.payload;
@@ -45,11 +35,13 @@ const roomsSlice = createSlice({
         addMessageToRoom: (state, action: PayloadAction<Message>) => {
             if (state.room) {
                 state.room.messages = [...state.room.messages, action.payload];
+                state.room.unreadMessages += 1;
             }
-            state.unreadMessages += 1;
         },
         setUnreadMessagesCount: (state, action: PayloadAction<number>) => {
-            state.unreadMessages = action.payload;
+            if (state.room) {
+                state.room.unreadMessages = action.payload;
+            }
         },
         addPlayer: (state, action: PayloadAction<Player>) => {
             if (state.room && !state.room.players.find(p => p.username === action.payload.username)) {
@@ -75,27 +67,38 @@ const roomsSlice = createSlice({
             state.roomsList = [...state.roomsList, action.payload];
             state.roomsListLoaded = true;
         },
-        resetRoom: (_state) => {
+        resetState: (_state) => {
             _state = initialState;
+        },
+        resetRoom: (state) => {
+            state.room = null;
         },
         removeRoom: (state, action: PayloadAction<string>) => {
             if (state.roomsList) {
                 state.roomsList = state.roomsList.filter(r => r.id !== action.payload);
-                state.availability = 'closed';
                 state.roomsListLoaded = true;
+                state.room = null;
             }
         },
         setCurrentAnswer: (state, action: PayloadAction<Answer>) => {
-            state.currentAnswer = action.payload;
+            if (state.room) {
+                state.room.currentAnswer = action.payload;
+            }
         },
         resetCurrentAnswer: (state) => {
-            state.currentAnswer = null;
+            if (state.room) {
+                state.room.currentAnswer = null;
+            }
         },
         setQuestionIndex: (state, action: PayloadAction<number>) => {
-            state.questionIndex = action.payload;
+            if (state.room) {
+                state.room.questionIndex = action.payload;
+            }
         },
         setGameStatus: (state, action: PayloadAction<GameStatus["status"]>) => {
-            state.gameStatus = action.payload;
+            if (state.room) {
+                state.room.gameStatus = action.payload;
+            };
         }
     },
 });
@@ -110,6 +113,7 @@ export const {
     removePlayer,
     setRoomsList,
     addRoomToList,
+    resetState,
     resetRoom,
     removeRoom,
     setCurrentAnswer,
@@ -117,4 +121,5 @@ export const {
     setQuestionIndex,
     setGameStatus,
 } = roomsSlice.actions;
+
 export default roomsSlice.reducer;

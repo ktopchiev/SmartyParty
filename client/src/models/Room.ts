@@ -1,3 +1,5 @@
+import type Answer from "./Answer";
+import type { GameStatus } from "./GameStatus";
 import type { Player } from "./Player";
 
 export type Message = {
@@ -32,4 +34,9 @@ export default interface Room {
     messages: Message[];
     questions: Question[];
     allPlayersAnswered: boolean;
+    questionIndex: number;
+    gameStatus: GameStatus["status"];
+    availability: 'open' | 'closed';
+    currentAnswer: Answer | null;
+    unreadMessages: number;
 }

@@ -9,7 +9,7 @@ export const store = configureStore({
     reducer: {
         user: userSlice.reducer,
         [userApi.reducerPath]: userApi.reducer,
-        room: roomsSlice,
+        rooms: roomsSlice,
     },
     middleware: (getDefaultMiddleware) => {
         return getDefaultMiddleware({})
