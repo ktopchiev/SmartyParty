@@ -42,7 +42,7 @@ It is still not live.
 
 •	**Frontend**: React, Redux, Bootstrap
 
-•	**Deployment**: Docker, Fly.io, GitHub Actions
+•	**Deployment**: -
 
 ### How to run the app locally:
 
