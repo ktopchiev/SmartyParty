@@ -1,4 +1,3 @@
-import { HubConnectionState } from "@microsoft/signalr";
 import { toast } from "react-toastify";
 import { ToRoomRequest } from "../models/RoomRequest";
 import SignalRService from "../services/signalR/SignalRService";
@@ -6,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useAppSelector } from "../services/store";
 import { Row, Col, Button, Form, Spinner } from "react-bootstrap";
+import { HubConnectionState } from "@microsoft/signalr";
 
 export type FormData = {
     roomName: string;
@@ -60,12 +60,21 @@ export default function CreateRoomForm() {
 
     const handleCreateRoom = async (data: FormData) => {
         event?.preventDefault();
+        setIsLoading(true);
 
-        if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
+        const connection = SignalRService.getSignalRConnection();
+
+        if (!connection) {
+            console.error("No SignalR connection instance found");
+            return;
+        }
+
+        if (connection.state === HubConnectionState.Disconnected) {
             await SignalRService.startUserRoomConnection();
         }
-        setIsLoading(true);
-        let roomRequest = ToRoomRequest(user?.username!, data);
+
+        let roomRequest = ToRoomRequest(user?.username ?? "", data);
+
         try {
             await SignalRService.createRoom(roomRequest);
         } catch (error: any) {

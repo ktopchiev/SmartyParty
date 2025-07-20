@@ -53,7 +53,7 @@ function App() {
 
 	return (
 		<div>
-			<ToastContainer position="bottom-right" hideProgressBar={true} transition={Slide} autoClose={3000} theme="colored" />
+			<ToastContainer position="bottom-right" hideProgressBar={true} transition={Slide} autoClose={2000} theme="colored" />
 			<Header />
 			<div>
 				<Outlet />

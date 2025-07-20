@@ -7,7 +7,7 @@ interface AnimatedTimerProps {
 
 export default function AnimatedTimer({ seconds, hasEnded }: AnimatedTimerProps) {
   return (
-    <div className="text-center mt-4">
+    <div className="text-center mt-3">
       <AnimatePresence>
         {!hasEnded && seconds !== null ? (
           <motion.div
@@ -16,8 +16,8 @@ export default function AnimatedTimer({ seconds, hasEnded }: AnimatedTimerProps)
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="display-3 fw-bold bg-warning text-dark rounded-circle d-inline-block px-4 py-2 shadow"
-            style={{ minWidth: 100 }}
+            className="display-6 fw-bold bg-warning text-dark rounded-circle d-inline-block px-2 py-2 shadow"
+            style={{ minWidth: 70 }}
           >
             {seconds}
           </motion.div>

@@ -99,8 +99,8 @@ public class SmartyPartyHub : Hub
 
     public async Task CreateRoom(RoomRequest roomRequest)
     {
-        //Remove this delay in production
-        await Task.Delay(2000);
+
+        if (roomRequest is null) throw new HubException("Invalid room request");
 
         var player = roomRequest.Username;
         var roomName = roomRequest.RoomName;
@@ -204,26 +204,32 @@ public class SmartyPartyHub : Hub
 
     public async Task GetRoom(string roomId, string playerUserName)
     {
-        if (string.IsNullOrWhiteSpace(roomId))
+        try
         {
-            throw new HubException("Invalid room ID");
-        }
+            if (string.IsNullOrWhiteSpace(roomId))
+            {
+                throw new HubException("Invalid room ID");
+            }
 
-        var room = _userConnectionService.GetRoomById(roomId);
-        if (room == null)
+            var room = _userConnectionService.GetRoomById(roomId);
+            if (room == null)
+            {
+                throw new HubException("Room not found");
+            }
+
+            var player = _userConnectionService.GetPlayerByUsername(playerUserName);
+            if (player != null && _userConnectionService.GetPlayerInRoomByUsername(roomId, player.Username) == null)
+            {
+                await Clients.Caller.SendAsync("AccessDenied", "You are not part of this room.");
+                return;
+            }
+
+            await Clients.Caller.SendAsync("ReceiveRoom", room.ToRoomResponse());
+        }
+        catch (System.Exception ex)
         {
-            await Clients.Caller.SendAsync("HandleError", $"Room with id - {roomId}, does not exist.");
-            throw new HubException("Room not found");
+            await Clients.Caller.SendAsync("HandleError", $"Could not get the room. Error: {ex.Message}");
         }
-
-        var player = _userConnectionService.GetPlayerByUsername(playerUserName);
-        if (player != null && _userConnectionService.GetPlayerInRoomByUsername(roomId, player.Username) == null)
-        {
-            await Clients.Caller.SendAsync("AccessDenied", "You are not part of this room.");
-            return;
-        }
-
-        await Clients.Caller.SendAsync("ReceiveRoom", room.ToRoomResponse());
     }
 
     public async Task RemoveRoom(string roomId)

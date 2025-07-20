@@ -1,7 +1,7 @@
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from "@microsoft/signalr";
 import { store } from "../store";
 import type Room from "../../models/Room";
-import { addMessageToRoom, addPlayer, addRoomToList, removePlayer, removeRoom, setCurrentAnswer, setGameStatus, setQuestionIndex, setRoom, setRoomsList, updatePlayer } from "../room/roomsSlice";
+import { addMessageToRoom, addPlayer, addRoomToList, removePlayer, removeRoom, resetRoom, setCurrentAnswer, setGameStatus, setQuestionIndex, setRoom, setRoomsList, updatePlayer } from "../room/roomsSlice";
 import type { MessageDto } from "../../models/MessageDto";
 import type { RoomRequest } from "../../models/RoomRequest";
 import type { Message } from "../../models/Room";
@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import type { Player } from "../../models/Player";
 import type Answer from "../../models/Answer";
 import type { GameStatus } from "../../models/GameStatus";
+import { navigate } from "../../navigate/navigate";
 
 class SignalRService {
 
@@ -37,7 +38,10 @@ class SignalRService {
 
     public async startUserRoomConnection() {
 
-        if (this.signalRConnection?.state === HubConnectionState.Connected || this.signalRConnection?.state === HubConnectionState.Connecting) return;
+        if (this.signalRConnection?.state === HubConnectionState.Connected || this.signalRConnection?.state === HubConnectionState.Connecting) {
+            console.info("SignalR connection already started or connecting.");
+            return;
+        };
 
         this.signalRConnection?.on("UserConnected", () => {
             console.log("Server called here");
@@ -57,12 +61,6 @@ class SignalRService {
                 console.log("Reconnected to SignalR.");
             } catch (err) {
                 console.error("Reconnection failed:", err);
-            }
-        });
-
-        this.signalRConnection?.on("RoomCreated", (room) => {
-            if (this.onRoomCreatedCallback) {
-                this.onRoomCreatedCallback(room);
             }
         });
 
@@ -96,9 +94,11 @@ class SignalRService {
             };
             store.dispatch(removePlayer(player));
             store.dispatch(addMessageToRoom(msg));
-            const room = store.getState().room.room;
+            const room = store.getState().rooms.room;
             if (room?.players.length === 0) {
                 store.dispatch(removeRoom(room.id));
+            } else {
+                store.dispatch(resetRoom());
             }
         });
 
@@ -110,6 +110,12 @@ class SignalRService {
             store.dispatch(setRoom(room));
             store.dispatch(addRoomToList(room));
             store.dispatch(setGameStatus('init'));
+        });
+
+        this.signalRConnection?.on("RoomCreated", (room) => {
+            if (this.onRoomCreatedCallback) {
+                this.onRoomCreatedCallback(room);
+            }
         });
 
         this.signalRConnection?.on("RoomRemoved", (roomId) => {
@@ -125,12 +131,12 @@ class SignalRService {
         });
 
         this.signalRConnection?.on("HandleError", (error: string) => {
-            this.onErrorCallback?.(error);
+            navigate("/server-error", error);
         });
 
         this.signalRConnection?.on("AccessDenied", (message: string) => {
             toast.warning(message);
-            window.location.href = "/";
+            navigate("/", message);
         });
     }
 
@@ -170,7 +176,7 @@ class SignalRService {
             console.error("SignalR connection is not established.");
             return;
         }
-        console.log("SignalR", "joinRoom");
+
         try {
             await this.signalRConnection?.invoke("JoinRoom", roomId, username);
         } catch (error) {
@@ -180,6 +186,11 @@ class SignalRService {
 
 
     public async leaveRoom(roomId: string, player: string) {
+        if (!this.signalRConnection) {
+            console.error("SignalR connection is not established.");
+            return;
+        }
+
         try {
             await this.signalRConnection?.invoke("LeaveRoom", roomId, player);
         } catch (error) {

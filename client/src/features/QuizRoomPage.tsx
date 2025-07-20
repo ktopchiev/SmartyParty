@@ -36,100 +36,108 @@ const QuizRoomPage: React.FC = () => {
 	const { timeLeft, hasEnded, startTimer } = useRoomTimer(roomId!, false);
 
 	const { user } = useAppSelector((state) => state.user);
-	const { room, status, currentAnswer, questionIndex, availability, gameStatus } = useAppSelector((state) => state.room);
+	const { room, status } = useAppSelector((state) => state.rooms);
+	const { currentAnswer, questionIndex, availability, gameStatus } = room || {};
 	const dispatch = useAppDispatch();
 
 	const timer = 30;
 
 	const player = useMemo(() => {
 		return room?.players.find((p) => p.username === user?.username);
+
 	}, [room?.players]);
 
-	useEffect(() => {
-		if (questionIndex + 1 < (room?.questions.length || 0)) {
-			updatePlayer();
-		}
 
-		if (hasEnded) {
-			setGameFinale();
-		}
-	}, [questionIndex, hasEnded]);
+	const isQuizEnded = (): boolean => hasEnded === true && (questionIndex || 0) + 1 >= (room?.questions.length || 0);
 
-	const updatePlayer = async () => {
-		const updatedPlayer = {
+	const updatePlayer = async (questionIndex: number, points: number = 0) => {
+		const updatedPlayer: Player = {
 			...player,
-			username: user?.username!,
-			currentQuestionIndex: questionIndex + 1,
-			points: player?.points ?? 0,
+			username: player?.username ?? "",
+			currentQuestionIndex: questionIndex,
+			points: points,
 		};
 
 		await SignalRService.updatePlayer(roomId!, updatedPlayer);
+
 	};
+
 
 	const setGameFinale = async () => {
-		const gameStatus: GameStatus = {
-			roomId: roomId!,
-			status: "finale",
-		};
+		console.log("setGameFinale");
+		await SignalRService.removeRoom(roomId!);
+		SignalRService.stopUserRoomConnection();
+		navigate(`/quizroom/${roomId!}/finale`);
 
-		await SignalRService.sendGameStatus(gameStatus);
 	};
 
-	useEffect(() => {
 
+	useEffect(() => {
+		if (!isQuizEnded()) {
+			console.log("hasEnded:", hasEnded);
+			console.log("updatePlayer");
+			updatePlayer((questionIndex || 0) + 1);
+		}
+
+		if (isQuizEnded()) {
+			setGameFinale();
+		}
+
+	}, [hasEnded]);
+
+
+	useEffect(() => {
 		SignalRService.setOnErrorCallback((error) => {
 			console.error("SignalR error:", error);
+			dispatch(setStatus('error'));
 			navigate("/not-found"); // Redirect user
+
 		});
 
 		const fetchRoom = async () => {
 			dispatch(setStatus('loading'));
-			if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
+			if (SignalRService.getSignalRConnection()?.state === HubConnectionState.Disconnected) {
 				await SignalRService.startUserRoomConnection();
 			}
 
-			await SignalRService.getRoom(roomId!, player?.username!);
+			await SignalRService.getRoom(roomId!, player?.username || "");
+
 		};
 
 		fetchRoom();
+
 	}, []);
 
-	useEffect(() => {
 
+	useEffect(() => {
 		const joinRoom = async () => {
-			await SignalRService.joinRoom(roomId!, user?.username!);
+			await SignalRService.joinRoom(roomId!, user?.username || "");
+
 		}
 
 		if (status === 'ready') joinRoom();
-	}, [status])
 
-	useEffect(() => {
-		const endGame = async () => {
-			if (gameStatus === "finale") {
-				await SignalRService.removeRoom(roomId!);
-				SignalRService.stopUserRoomConnection();
+	}, [status]);
 
-				gameStatus === "finale" && navigate(`/quizroom/${roomId!}/finalе`);
-			}
-		};
-
-		endGame();
-	}, [gameStatus, room?.players]);
 
 	useEffect(() => {
 		if (availability === 'closed') {
 			toast.error(`Room ${room?.name} was closed.`);
 			navigate("/");
 		}
+
 	}, [availability]);
+
 
 	const handleLeaveRoom = async () => {
 		if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
 			await SignalRService.startUserRoomConnection();
 		}
-		await SignalRService.leaveRoom(roomId!, user?.username!);
+		await SignalRService.leaveRoom(roomId!, user?.username || "");
 		navigate("/");
+
 	};
+
 
 	const handleSelect = async (_option: Option, index: number) => {
 		if (showAnswer) return;
@@ -140,13 +148,7 @@ const QuizRoomPage: React.FC = () => {
 			await SignalRService.startUserRoomConnection();
 		}
 
-		const player: Player = {
-			username: user?.username ?? "",
-			points: _option.isCorrect ? 10 : 0,
-			currentQuestionIndex: questionIndex,
-		}
-
-		await SignalRService.updatePlayer(roomId!, player);
+		updatePlayer((questionIndex || 0), _option.isCorrect ? 10 : 0)
 
 		const answer: Answer = {
 			id: _option.id,
@@ -154,10 +156,10 @@ const QuizRoomPage: React.FC = () => {
 			from: user?.username ?? "",
 			option: _option,
 		};
-
 		await SignalRService.sendAnswer(answer);
 
 	};
+
 
 	const handleStart = async (timerSeconds: number) => {
 		const gameStatus: GameStatus = {
@@ -167,11 +169,14 @@ const QuizRoomPage: React.FC = () => {
 
 		await SignalRService.sendGameStatus(gameStatus);
 		startTimer(timerSeconds);
+
 	};
+
 
 	const onHintClick = () => {
 		// Logic to show a hint
 		console.log("Hint clicked");
+
 	};
 
 	function setAnswerBadge(opt: Option, idx: number) {
@@ -229,12 +234,12 @@ const QuizRoomPage: React.FC = () => {
 
 					<div className="d-flex justify-content-between align-items-center mb-3">
 						<div className="small text-muted">
-							Question <strong>{room?.questions[questionIndex]?.id} of {room?.numberOfQuestions || 0}</strong>
+							Question <strong>{room?.questions[questionIndex || 0]?.id} of {room?.numberOfQuestions || 0}</strong>
 						</div>
 						<ProgressBar
 							className="flex-grow-1 mx-3"
 							style={{ height: "5px" }}
-							now={((room?.questions[questionIndex]?.id! / (room?.numberOfQuestions || 1)) * 100) || 0}
+							now={((room?.questions[questionIndex || 0]?.id! / (room?.numberOfQuestions || 1)) * 100) || 0}
 							variant="warning"
 						/>
 
@@ -246,17 +251,17 @@ const QuizRoomPage: React.FC = () => {
 						<Card.Body className="p-4">
 							<div className="d-flex justify-content-between align-items-center mb-1">
 								<h6 className="mb-0">
-									Question <span className="text-warning">{String(room?.questions[questionIndex]?.id).padStart(2, "0")}</span>
+									Question <span className="text-warning">{String(room?.questions[questionIndex || 0]?.id).padStart(2, "0")}</span>
 								</h6>
 								<Button size="sm" variant="warning" disabled onClick={onHintClick}>
 									Hint
 								</Button>
 							</div>
 
-							<h3 className="my-3 text-center">{room?.questions[questionIndex]?.questionContent || ""}</h3>
+							<h3 className="my-3 text-center">{room?.questions[questionIndex || 0]?.questionContent || ""}</h3>
 
 							<ListGroup className="mx-3">
-								{room?.questions[questionIndex]?.options.map((opt: Option, idx) => {
+								{room?.questions[questionIndex || 0]?.options.map((opt: Option, idx) => {
 									const isSelected = selected === idx;
 									const correct = opt.isCorrect;
 									const isWrong = showAnswer && isSelected && !correct;

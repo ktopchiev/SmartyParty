@@ -11,14 +11,14 @@ interface Props {
 
 export default function ChatWindow({ roomId }: Props) {
 	const [input, setInput] = useState("");
-	const { room } = useAppSelector((state) => state.room);
+	const { room } = useAppSelector((state) => state.rooms);
 	const { user } = useAppSelector((state) => state.user);
 
 	const handleSend = async () => {
 		if (input.trim()) {
 			const messageDto: MessageDto = {
 				roomId,
-				from: user?.username!,
+				from: user?.username || "",
 				content: input.trim(),
 				isRead: false,
 			};

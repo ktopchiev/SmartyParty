@@ -1,16 +1,26 @@
 import React from "react";
-import { useAppSelector } from "../services/store";
-import { Container, Row, Col, Card, Badge } from "react-bootstrap";
-import { Link } from "react-router";
-import { useScreenSize } from "../hooks/useScreenSize";
+import { useAppDispatch, useAppSelector } from "../services/store";
+import { Container, Row, Col, Card, Badge, Button } from "react-bootstrap";
+import { useNavigate } from "react-router";
+import { removeRoom } from "../services/room/roomsSlice";
+
 
 export const FinalPage: React.FC = () => {
-    const { room } = useAppSelector((state) => state.room);
+
+    const { room } = useAppSelector((state) => state.rooms);
     const sortedPlayers = room?.players.slice().sort((a, b) => b.points - a.points);
     let draw = sortedPlayers && sortedPlayers[0].points === sortedPlayers[1].points;
-    const screenSize = useScreenSize();
+    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
 
-    if (!room) return null;
+    // if (!room) return null;
+
+    const handleBackToHome = () => {
+        navigate("/");
+        if (room) {
+            dispatch(removeRoom(room?.id));
+        }
+    }
 
     return (
         <Container className="bg-light mt-3 text-dark d-flex flex-column align-items-center">
@@ -20,7 +30,7 @@ export const FinalPage: React.FC = () => {
                 </Row>
             }
             <Row className="w-150 justify-content-center">
-                {room.players.map((player) => {
+                {room?.players.map((player) => {
                     const isWinner = !draw && sortedPlayers![0].username === player.username;
                     return (
                         <Col key={player.username} xs={6} md={6} className="mb-4">
@@ -49,7 +59,7 @@ export const FinalPage: React.FC = () => {
                 })}
             </Row>
             <Row>
-                <Link to="/" role="button" className="btn btn-primary">Back to Home</Link>
+                <Button type="button" className="btn btn-primary" onClick={() => handleBackToHome()}>Back to Home</Button>
             </Row>
         </Container>
     );

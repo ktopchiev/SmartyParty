@@ -8,18 +8,16 @@ import { setUnreadMessagesCount } from '../../services/room/roomsSlice';
 
 function ChatUI() {
 	const [showModal, setShowModal] = useState(false);
-	const { room, unreadMessages } = useAppSelector((state: RootState) => state.room);
+	const { room } = useAppSelector((state: RootState) => state.rooms);
+	const { unreadMessages } = room || {};
 	const dispatch = useAppDispatch();
 	const { roomId } = useParams<{ roomId: string }>();
 
 	const openChat = () => {
 		setShowModal(true);
 		dispatch(setUnreadMessagesCount(0));
-	};
 
-	const readMessages = (count: number): void => {
-		
-	}
+	};
 
 	const closeChat = () => setShowModal(false);
 
@@ -42,7 +40,7 @@ function ChatUI() {
 				onClick={openChat}
 			>
 				<ChatDots size={24} />
-				{unreadMessages > 0 && (
+				{unreadMessages || 0 > 0 && (
 					<Badge
 						pill
 						bg="danger"

@@ -1,4 +1,4 @@
-import { useLocation } from "react-router";
+import { useLocation } from "react-router-dom";
 import { Container } from "react-bootstrap";
 
 export default function ServerError() {

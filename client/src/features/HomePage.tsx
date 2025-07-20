@@ -19,13 +19,12 @@ export type FormData = {
 export default function HomePage() {
 	const [loading, setLoading] = useState<boolean>(false);
 	const { loggedIn, user } = useAppSelector((state) => state.user);
-	const { roomsList, status, roomsListLoaded } = useAppSelector((state) => state.room);
+	const { roomsList, roomsListLoaded } = useAppSelector((state) => state.rooms);
 	const navigate = useNavigate();
 
 	useEffect(() => {
 
 		const fetchAndSetRooms = async () => {
-
 			const connection = SignalRService.getSignalRConnection();
 
 			if (!connection) {
@@ -33,7 +32,7 @@ export default function HomePage() {
 				return;
 			}
 
-			if (connection.state !== HubConnectionState.Connected) {
+			if (connection.state === HubConnectionState.Disconnected) {
 				try {
 					await SignalRService.startUserRoomConnection();
 				} catch (error) {
@@ -55,7 +54,6 @@ export default function HomePage() {
 	useEffect(() => {
 
 		SignalRService.setOnRoomCreatedCallback((room) => {
-			console.log("Room created callback:", room);
 			navigate(`/quizroom/${room.id}`);
 		});
 
@@ -73,15 +71,12 @@ export default function HomePage() {
 
 	// Clean up a room and remove it from the list - Only available for admins
 	const handleRemoveRoom = async (roomId: string) => {
-		setLoading(true);
+
 		if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
 			await SignalRService.startUserRoomConnection();
 		}
 		await SignalRService.removeRoom(roomId);
-		setLoading(false);
 	}
-
-	if (status === "loading") return <Loading />
 
 	return (
 

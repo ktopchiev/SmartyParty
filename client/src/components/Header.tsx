@@ -11,7 +11,7 @@ import CreateRoomForm from "./CreateRoomForm";
 
 export default function Header() {
 	const { loggedIn, user, registered } = useAppSelector((state) => state.user);
-	const { room } = useAppSelector((state) => state.room);
+	const { room } = useAppSelector((state) => state.rooms);
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
 	const [showLogin, setShowLogin] = useState(false);
@@ -25,17 +25,20 @@ export default function Header() {
 		toast.success("User logged out.");
 		setShowUserMenu(false);
 		navigate("/");
+
 	};
 
 	useEffect(() => {
 		if (loggedIn) setShowLogin(false);
 		if (registered) setShowRegister(false);
 		if (room) setShowUserMenu(false);
+
 	}, [loggedIn, registered, room])
 
 	const handleClickNavBtn = (setFn: any) => {
 		setFn(true);
 		setExpanded(false);
+
 	}
 
 	return (
@@ -51,7 +54,7 @@ export default function Header() {
 							<p style={{ fontSize: "10px", margin: 0, padding: 0, fontWeight: "bold", color: "purple" }}>AI Powered</p>
 						</Col>
 					</div>
-					{}
+					{ }
 					<Button
 						variant="warning"
 						size="sm"
