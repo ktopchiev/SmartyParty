@@ -43,20 +43,20 @@ export default function CreateRoomForm() {
     const languages = [
         { id: 1, language: "български" },
         { id: 2, language: "english" },
-    ]
+    ];
 
     const questionNumbers = [
         { id: 1, num: "5" },
         { id: 2, num: "10" },
         { id: 3, num: "20" },
-    ]
+    ];
 
     const difficulties = [
         { id: 1, level: "easy" },
         { id: 2, level: "normal" },
         { id: 3, level: "hard" },
         { id: 4, level: "expert" },
-    ]
+    ];
 
     const handleCreateRoom = async (data: FormData) => {
         event?.preventDefault();

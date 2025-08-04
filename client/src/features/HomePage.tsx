@@ -50,7 +50,7 @@ export default function HomePage() {
 		fetchAndSetRooms();
 	}, []);
 
-
+	//When room is created navigate to room page
 	useEffect(() => {
 
 		SignalRService.setOnRoomCreatedCallback((room) => {

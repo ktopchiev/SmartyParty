@@ -3,7 +3,7 @@ import SignalRService from "../services/signalR/SignalRService";
 
 export function useRoomTimer(roomId: string, autoStart = false, duration = 30) {
   const [timeLeft, setTimeLeft] = useState<number>(duration);
-  const [hasEnded, setHasEnded] = useState(false);
+  const [roundHasEnded, setRoundHasEnded] = useState(false);
 
   useEffect(() => {
     const connection = SignalRService.getSignalRConnection();
@@ -14,7 +14,7 @@ export function useRoomTimer(roomId: string, autoStart = false, duration = 30) {
     };
 
     const handleEnd = () => {
-      setHasEnded(true);
+      setRoundHasEnded(true);
       setTimeLeft(0);
     };
 
@@ -37,7 +37,7 @@ export function useRoomTimer(roomId: string, autoStart = false, duration = 30) {
 
   return {
     timeLeft,
-    hasEnded,
+    roundHasEnded,
     startTimer,
   };
 }

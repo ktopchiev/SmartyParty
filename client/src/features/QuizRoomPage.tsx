@@ -33,7 +33,7 @@ const QuizRoomPage: React.FC = () => {
 	const { roomId } = useParams<{ roomId: string }>();
 	const navigate = useNavigate();
 
-	const { timeLeft, hasEnded, startTimer } = useRoomTimer(roomId!, false);
+	const { timeLeft, roundHasEnded, startTimer } = useRoomTimer(roomId!, false);
 
 	const { user } = useAppSelector((state) => state.user);
 	const { room, status } = useAppSelector((state) => state.rooms);
@@ -48,11 +48,11 @@ const QuizRoomPage: React.FC = () => {
 	}, [room?.players]);
 
 
-	const isQuizEnded = (): boolean => hasEnded === true && (questionIndex || 0) + 1 >= (room?.questions.length || 0);
+	const isQuizEnded = (): boolean => roundHasEnded === true && (questionIndex || 0) + 1 >= (room?.questions.length || 0);
+
 
 	const updatePlayer = async (questionIndex: number, points: number = 0) => {
 		const updatedPlayer: Player = {
-			...player,
 			username: player?.username ?? "",
 			currentQuestionIndex: questionIndex,
 			points: points,
@@ -74,7 +74,7 @@ const QuizRoomPage: React.FC = () => {
 
 	useEffect(() => {
 		if (!isQuizEnded()) {
-			console.log("hasEnded:", hasEnded);
+			console.log("hasEnded:", roundHasEnded);
 			console.log("updatePlayer");
 			updatePlayer((questionIndex || 0) + 1);
 		}
@@ -83,7 +83,7 @@ const QuizRoomPage: React.FC = () => {
 			setGameFinale();
 		}
 
-	}, [hasEnded]);
+	}, [roundHasEnded]);
 
 
 	useEffect(() => {
@@ -244,7 +244,7 @@ const QuizRoomPage: React.FC = () => {
 						/>
 
 						{/* Timer */}
-						<AnimatedTimer seconds={timeLeft} hasEnded={hasEnded} />
+						<AnimatedTimer seconds={timeLeft} hasEnded={roundHasEnded} />
 					</div>
 
 					<Card className="shadow-lg rounded-4 border-0 bg-light text-dark border-dark">

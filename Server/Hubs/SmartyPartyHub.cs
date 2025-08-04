@@ -90,7 +90,7 @@ public class SmartyPartyHub : Hub
     {
         if (string.IsNullOrEmpty(player.Username))
         {
-            throw new HubException("Invalid player username");
+            throw new HubException("Username cannot be null or empty.");
         }
 
         _userConnectionService.UpdatePlayerInRoom(roomId, player.Username, player.CurrentQuestionIndex, player.Points);

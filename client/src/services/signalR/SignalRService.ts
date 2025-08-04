@@ -112,7 +112,7 @@ class SignalRService {
             store.dispatch(setGameStatus('init'));
         });
 
-        this.signalRConnection?.on("RoomCreated", (room) => {
+        this.signalRConnection?.on("RoomCreated", (room: Room) => {
             if (this.onRoomCreatedCallback) {
                 this.onRoomCreatedCallback(room);
             }
