@@ -3,7 +3,7 @@ import { Container, Navbar } from 'react-bootstrap';
 export default function Footer() {
     return (
         <Navbar
-            fixed="bottom"
+            sticky="bottom"
             style={{ backgroundColor: '#212529' }} // Dark background explicitly set
             className="shadow-sm py-3 mt-3"
         >

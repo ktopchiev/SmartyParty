@@ -73,9 +73,7 @@ const QuizRoomPage: React.FC = () => {
 
 
 	useEffect(() => {
-		if (!isQuizEnded()) {
-			console.log("hasEnded:", roundHasEnded);
-			console.log("updatePlayer");
+		if (!isQuizEnded() && roundHasEnded) {
 			updatePlayer((questionIndex || 0) + 1);
 		}
 
