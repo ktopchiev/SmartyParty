@@ -43,7 +43,7 @@ export default function Header() {
 
 	return (
 		<>
-			<Navbar expand="lg" expanded={expanded} bg="light">
+			<Navbar expand="lg" expanded={expanded} bg={user?.username === "admin" ? "danger" : "light"}>
 				<Container fluid>
 					<div className="d-flex flex-row">
 						<Col>
@@ -88,30 +88,31 @@ export default function Header() {
 						</Nav>
 					</Navbar.Collapse>
 				</Container>
-			</Navbar>
+			</Navbar >
 
 			{/* Login Offcanvas */}
-			<Offcanvas show={showLogin} onHide={() => setShowLogin(false)} placement="end" backdrop={true}>
+			< Offcanvas show={showLogin} onHide={() => setShowLogin(false)
+			} placement="end" backdrop={true} >
 				<Offcanvas.Header closeButton>
 					<Offcanvas.Title>Login</Offcanvas.Title>
 				</Offcanvas.Header>
 				<Offcanvas.Body>
 					<LoginForm />
 				</Offcanvas.Body>
-			</Offcanvas>
+			</Offcanvas >
 
 			{/* Register Offcanvas */}
-			<Offcanvas show={showRegister} onHide={() => setShowRegister(false)} placement="end" backdrop={true}>
+			< Offcanvas show={showRegister} onHide={() => setShowRegister(false)} placement="end" backdrop={true} >
 				<Offcanvas.Header closeButton>
 					<Offcanvas.Title>Register</Offcanvas.Title>
 				</Offcanvas.Header>
 				<Offcanvas.Body>
 					<RegisterForm />
 				</Offcanvas.Body>
-			</Offcanvas>
+			</Offcanvas >
 
 			{/* User Offcanvas */}
-			<Offcanvas show={showUserMenu} onHide={() => setShowUserMenu(false)} placement="end" backdrop={true}>
+			< Offcanvas show={showUserMenu} onHide={() => setShowUserMenu(false)} placement="end" backdrop={true} >
 				<Offcanvas.Header closeButton>
 					<Offcanvas.Title>{user?.email}</Offcanvas.Title>
 				</Offcanvas.Header>
@@ -127,7 +128,7 @@ export default function Header() {
 					</Accordion>
 					<Button variant="danger" className="w-100" onClick={handleLogout}>Log Out</Button>
 				</Offcanvas.Body>
-			</Offcanvas>
+			</Offcanvas >
 		</>
 	);
 }

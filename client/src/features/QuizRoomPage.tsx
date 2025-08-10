@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useContext } from "react";
 import { useNavigate, useParams } from "react-router";
 import SignalRService from "../services/signalR/SignalRService";
 import { LogOut } from "lucide-react";
@@ -24,6 +24,7 @@ import {
 	ListGroup,
 	Card,
 } from "react-bootstrap";
+import { UserContext } from "../context/userContext";
 
 const QuizRoomPage: React.FC = () => {
 
@@ -35,7 +36,7 @@ const QuizRoomPage: React.FC = () => {
 
 	const { timeLeft, roundHasEnded, startTimer } = useRoomTimer(roomId!, false);
 
-	const { user } = useAppSelector((state) => state.user);
+	const username = useContext(UserContext);
 	const { room, status } = useAppSelector((state) => state.rooms);
 	const { currentAnswer, questionIndex, availability, gameStatus } = room || {};
 	const dispatch = useAppDispatch();
@@ -43,7 +44,7 @@ const QuizRoomPage: React.FC = () => {
 	const timer = 30;
 
 	const player = useMemo(() => {
-		return room?.players.find((p) => p.username === user?.username);
+		return room?.players.find((p) => p.username === username);
 
 	}, [room?.players]);
 
@@ -109,7 +110,7 @@ const QuizRoomPage: React.FC = () => {
 
 	useEffect(() => {
 		const joinRoom = async () => {
-			await SignalRService.joinRoom(roomId!, user?.username || "");
+			await SignalRService.joinRoom(roomId!, username);
 
 		}
 
@@ -131,7 +132,7 @@ const QuizRoomPage: React.FC = () => {
 		if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
 			await SignalRService.startUserRoomConnection();
 		}
-		await SignalRService.leaveRoom(roomId!, user?.username || "");
+		await SignalRService.leaveRoom(roomId!, username);
 		navigate("/");
 
 	};
@@ -151,7 +152,7 @@ const QuizRoomPage: React.FC = () => {
 		const answer: Answer = {
 			id: _option.id,
 			roomId: roomId!,
-			from: user?.username ?? "",
+			from: player?.username ?? "",
 			option: _option,
 		};
 		await SignalRService.sendAnswer(answer);
@@ -222,7 +223,7 @@ const QuizRoomPage: React.FC = () => {
 							<Badge bg="primary">Players: {room?.players.length}/2</Badge>
 							<ListGroup variant="flush" className="mt-1 small">
 								{room?.players.map((p, i) => (
-									<ListGroup.Item key={i} className="p-0 border-0 bg-light">
+									<ListGroup.Item key={i} className="p-0 border-0 bg-light" style={{ textShadow: p.username === username ? '0px 2px 2px rgba(15, 15, 15, 0.4)' : '' }}>
 										👤 {p.username} : {p.points} points
 									</ListGroup.Item>
 								))}
@@ -288,7 +289,7 @@ const QuizRoomPage: React.FC = () => {
 							</ListGroup>
 
 							<Row className="text-center mt-4">
-								{room?.creator === user?.username &&
+								{room?.creator === username &&
 									(<Button
 										variant="btn btn-success"
 										disabled={(room?.players.length ?? 0) < 2}

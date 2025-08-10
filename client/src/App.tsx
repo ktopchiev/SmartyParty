@@ -3,7 +3,7 @@ import Header from "./components/Header"
 import Footer from "./components/Footer"
 import { Slide, toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useAppDispatch } from "./services/store"
 import { useRefreshMutation } from "./services/user/userApi"
 import { setCurrentUser } from "./services/user/userSlice"
@@ -11,11 +11,13 @@ import { getJwtTokenFromLocalStorage } from "./util/utilities"
 import SignalRService from "./services/signalR/SignalRService"
 import { HubConnectionState } from "@microsoft/signalr"
 import { setNavigate } from "./navigate/navigate"
+import { UserContext } from "./context/userContext"
 
 function App() {
 	const dispatch = useAppDispatch();
 	const [refresh, { error }] = useRefreshMutation();
 	const navigate = useNavigate();
+	const [user, setUser] = useState<string>("");
 
 	useEffect(() => {
 		setNavigate(navigate);
@@ -38,6 +40,7 @@ function App() {
 			if (localStorageUserData) {
 				let userData = await refresh().unwrap();
 				dispatch(setCurrentUser(userData));
+				setUser(userData.username);
 			}
 		};
 
@@ -52,16 +55,18 @@ function App() {
 	}, []);
 
 	return (
-		<div>
-			<ToastContainer position="bottom-right" hideProgressBar={true} transition={Slide} autoClose={2000} theme="colored" />
-			<Header />
+		<UserContext value={user}>
 			<div>
-				<Outlet />
+				<ToastContainer position="bottom-right" hideProgressBar={true} transition={Slide} autoClose={2000} theme="colored" />
+				<Header />
+				<div>
+					<Outlet />
+				</div>
+				<footer>
+					<Footer />
+				</footer>
 			</div>
-			<footer>
-				<Footer />
-			</footer>
-		</div>
+		</UserContext>
 	)
 }
 
