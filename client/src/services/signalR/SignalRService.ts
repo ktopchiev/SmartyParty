@@ -1,7 +1,6 @@
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from "@microsoft/signalr";
 import { store } from "../store";
 import type Room from "../../models/Room";
-import { addMessageToRoom, addPlayer, addRoomToList, removePlayer, removeRoom, resetRoom, setCurrentAnswer, setGameStatus, setQuestionIndex, setRoom, setRoomsList, updatePlayer } from "../room/roomsSlice";
 import type { MessageDto } from "../../models/MessageDto";
 import type { RoomRequest } from "../../models/RoomRequest";
 import type { Message } from "../../models/Room";
@@ -10,6 +9,20 @@ import type { Player } from "../../models/Player";
 import type Answer from "../../models/Answer";
 import type { GameStatus } from "../../models/GameStatus";
 import { navigate } from "../../navigate/navigate";
+import {
+    addMessageToRoom,
+    addPlayer,
+    addRoomToList,
+    removePlayer,
+    removeRoom,
+    resetRoom,
+    setCurrentAnswer,
+    setGameStatus,
+    setQuestionIndex,
+    setRoom,
+    setRoomsList,
+    updatePlayer
+} from "../room/roomsSlice";
 
 class SignalRService {
 
@@ -149,6 +162,7 @@ class SignalRService {
         this.onErrorCallback = callback;
     }
 
+    //SignalR invoke functions
     public async createRoom(roomRequest: RoomRequest) {
         const roomName = roomRequest.RoomName;
         const topic = roomRequest.Topic;
