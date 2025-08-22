@@ -7,7 +7,6 @@ import type Room from "../models/Room";
 import { Container, Table, Button, Spinner, Row, Col } from "react-bootstrap";
 import CreateRoomForm from "../components/CreateRoomForm";
 import Loading from "../components/Loading";
-import { getUsernameFromJwtToken } from "../util/utilities";
 
 export type FormData = {
 	roomName: string;
@@ -24,8 +23,7 @@ export default function HomePage() {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		let username = getUsernameFromJwtToken();
-		console.log(username);
+
 		const fetchAndSetRooms = async () => {
 			const connection = SignalRService.getSignalRConnection();
 
