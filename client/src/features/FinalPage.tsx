@@ -1,8 +1,8 @@
 import React from "react";
-import { useAppDispatch, useAppSelector } from "../services/store";
-import { Container, Row, Col, Card, Badge, Button } from "react-bootstrap";
 import { useNavigate } from "react-router";
+import { useAppDispatch, useAppSelector } from "../services/store";
 import { removeRoom } from "../services/room/roomsSlice";
+import { Container, Row, Col, Card, Badge, Button } from "react-bootstrap";
 
 
 export const FinalPage: React.FC = () => {

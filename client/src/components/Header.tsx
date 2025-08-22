@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, NavLink as RouterNavLink } from "react-router";
+import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "../services/store";
 import { setLogOut } from "../services/user/userSlice";
 import SignalRService from "../services/signalR/SignalRService";
-import { toast } from "react-toastify";
-import { Navbar, Nav, Container, Offcanvas, Button, Accordion, Image, Col } from "react-bootstrap";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
 import CreateRoomForm from "./CreateRoomForm";
+import { Navbar, Nav, Container, Offcanvas, Button, Accordion, Image, Col } from "react-bootstrap";
 
 export default function Header() {
 	const { loggedIn, user, registered } = useAppSelector((state) => state.user);

@@ -2,10 +2,10 @@ import { useState, useEffect, useMemo, useContext } from "react";
 import { useNavigate, useParams } from "react-router";
 import { LogOut } from "lucide-react";
 import { toast } from "react-toastify";
+import { HubConnectionState } from "@microsoft/signalr";
 import SignalRService from "../services/signalR/SignalRService";
 import { setStatus } from "../services/room/roomsSlice";
 import { useAppDispatch, useAppSelector } from "../services/store";
-import { HubConnectionState } from "@microsoft/signalr";
 import type { GameStatus } from "../models/GameStatus";
 import type { Option } from "../models/Room";
 import type Answer from "../models/Answer";
@@ -38,7 +38,7 @@ export default function QuizRoomPage() {
 	const { timeLeft, roundHasEnded, startTimer } = useRoomTimer(roomId!, false);
 
 	const username = useContext(UserContext);
-	
+
 	const { room, status } = useAppSelector((state) => state.rooms);
 	const { currentAnswer, questionIndex, availability, gameStatus } = room || {};
 	const dispatch = useAppDispatch();

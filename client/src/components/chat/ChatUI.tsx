@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Modal, Button, Badge } from 'react-bootstrap';
-import { ChatDots } from 'react-bootstrap-icons';
-import ChatWindow from './ChatWindow';
 import { useParams } from 'react-router';
 import { useAppDispatch, useAppSelector, type RootState } from '../../services/store';
 import { setUnreadMessagesCount } from '../../services/room/roomsSlice';
+import ChatWindow from './ChatWindow';
+import { Modal, Button, Badge } from 'react-bootstrap';
+import { ChatDots } from 'react-bootstrap-icons';
 
 function ChatUI() {
 	const [showModal, setShowModal] = useState(false);

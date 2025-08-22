@@ -1,13 +1,12 @@
-import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useUserRegisterMutation } from "../services/user/userApi";
-import type RegisterRequest from "../models/RegisterRequest";
-
-import { Form, Button, Image } from "react-bootstrap";
 import { useAppDispatch } from "../services/store";
 import { setRegistered } from "../services/user/userSlice";
+import type RegisterRequest from "../models/RegisterRequest";
+import { Form, Button, Image } from "react-bootstrap";
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 type FormData = {
     username: string;

@@ -1,8 +1,8 @@
 import { useState } from "react";
+import { HubConnectionState } from "@microsoft/signalr";
 import { useAppSelector } from "../../services/store";
 import SignalRService from "../../services/signalR/SignalRService";
 import type { MessageDto } from "../../models/MessageDto";
-import { HubConnectionState } from "@microsoft/signalr";
 import { Card, Form, Button, Container, Row, Col } from "react-bootstrap";
 
 interface Props {
