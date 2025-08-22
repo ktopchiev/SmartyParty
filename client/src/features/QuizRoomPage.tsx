@@ -1,19 +1,20 @@
-import React, { useState, useEffect, useMemo, useContext } from "react";
+import { useState, useEffect, useMemo, useContext } from "react";
 import { useNavigate, useParams } from "react-router";
-import SignalRService from "../services/signalR/SignalRService";
 import { LogOut } from "lucide-react";
+import { toast } from "react-toastify";
+import SignalRService from "../services/signalR/SignalRService";
+import { setStatus } from "../services/room/roomsSlice";
 import { useAppDispatch, useAppSelector } from "../services/store";
 import { HubConnectionState } from "@microsoft/signalr";
+import type { GameStatus } from "../models/GameStatus";
 import type { Option } from "../models/Room";
-import { toast } from "react-toastify";
 import type Answer from "../models/Answer";
-import { setStatus } from "../services/room/roomsSlice";
+import type { Player } from "../models/Player";
 import ChatUI from "../components/chat/ChatUI";
 import Loading from "../components/Loading";
-import type { GameStatus } from "../models/GameStatus";
-import type { Player } from "../models/Player";
-import { useRoomTimer } from "../hooks/useRoomTimer";
 import AnimatedTimer from "../components/quiz-room/AnimatedTimer";
+import { useRoomTimer } from "../hooks/useRoomTimer";
+import { UserContext } from "../context/userContext";
 import {
 	Container,
 	Row,
@@ -24,11 +25,11 @@ import {
 	ListGroup,
 	Card,
 } from "react-bootstrap";
-import { UserContext } from "../context/userContext";
 
-const QuizRoomPage: React.FC = () => {
 
-	const [selected, setSelected] = useState<number | null>(null);
+export default function QuizRoomPage() {
+
+	const [selectedOpt, setSelectedOpt] = useState<number | null>(null);
 	const [showAnswer, setShowAnswer] = useState(false);
 
 	const { roomId } = useParams<{ roomId: string }>();
@@ -37,6 +38,7 @@ const QuizRoomPage: React.FC = () => {
 	const { timeLeft, roundHasEnded, startTimer } = useRoomTimer(roomId!, false);
 
 	const username = useContext(UserContext);
+	
 	const { room, status } = useAppSelector((state) => state.rooms);
 	const { currentAnswer, questionIndex, availability, gameStatus } = room || {};
 	const dispatch = useAppDispatch();
@@ -140,7 +142,7 @@ const QuizRoomPage: React.FC = () => {
 
 	const handleSelect = async (_option: Option, index: number) => {
 		if (showAnswer) return;
-		setSelected(index);
+		setSelectedOpt(index);
 		setShowAnswer(true);
 
 		if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
@@ -261,7 +263,7 @@ const QuizRoomPage: React.FC = () => {
 
 							<ListGroup className="mx-3">
 								{room?.questions[questionIndex || 0]?.options.map((opt: Option, idx) => {
-									const isSelected = selected === idx;
+									const isSelected = selectedOpt === idx;
 									const correct = opt.isCorrect;
 									const isWrong = showAnswer && isSelected && !correct;
 									const isRight = showAnswer && correct;
@@ -311,5 +313,3 @@ const QuizRoomPage: React.FC = () => {
 		</Container>
 	);
 };
-
-export default QuizRoomPage;
