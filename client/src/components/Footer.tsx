@@ -4,7 +4,7 @@ export default function Footer() {
     return (
         <Navbar
             sticky="bottom"
-            style={{ backgroundColor: '#212529' }} // Dark background explicitly set
+            style={{ backgroundColor: '#212529' }}
             className="shadow-sm py-3 mt-3"
         >
             <Container className="justify-content-center">

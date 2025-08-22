@@ -4,7 +4,7 @@ import SignalRService from "../services/signalR/SignalRService";
 import { HubConnectionState } from "@microsoft/signalr";
 import { useNavigate } from "react-router";
 import type Room from "../models/Room";
-import { Container, Table, Button, Spinner } from "react-bootstrap";
+import { Container, Table, Button, Spinner, Row, Col } from "react-bootstrap";
 import CreateRoomForm from "../components/CreateRoomForm";
 import Loading from "../components/Loading";
 import { getUsernameFromJwtToken } from "../util/utilities";
@@ -82,78 +82,83 @@ export default function HomePage() {
 
 	return (
 
-		<Container className="py-4 d-flex justify-content-evenly">
-			<div>
-				<h2 className="text-center">Rooms</h2>
-				{!loggedIn && <h5 className="text-center mark">Please log in to create or join rooms.</h5>}
-				{!roomsListLoaded && <Loading />}
-				<Table striped hover size="sm">
-					<thead>
-						<tr>
-							<th>Name</th>
-							<th>Creator</th>
-							<th>Topic</th>
-							<th>Status</th>
-							<th>Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						{roomsList?.map((room: Room) => (
-							<tr key={room.id}>
-								<td>{room.name}</td>
-								<td>{room.creator}</td>
-								<td>{room.topic}</td>
-								<td>{room.status}</td>
-								<td>
-									{loading ? (
-
-										<Button
-											variant="info"
-											disabled
-										>
-											<Spinner
-												as="span"
-												animation="grow"
-												size="sm"
-												role="status"
-												aria-hidden="true"
-											/>
-											{' '}Joining...
-										</Button>
-
-									) : (
-
-										<Button
-											variant="warning"
-											type="submit"
-											onClick={() => handleJoinRoom(room.id)}
-											disabled={!loggedIn}
-										>
-											Join
-										</Button>
-
-									)}
-									{user?.username === "admin" && (
-										<Button
-											variant="danger"
-											size="sm"
-											onClick={() => handleRemoveRoom(room.id)}
-										>
-											Remove
-										</Button>
-									)}
-								</td>
+		<Container className="py-4" style={{ minHeight: '80vh' }}>
+			<Row>
+				<Col style={{ maxWidth: '600px', margin: '0 auto' }}>
+					<h2 className="text-center">Rooms</h2>
+					{!loggedIn && <h5 className="text-center mark">Please log in to create or join rooms.</h5>}
+					{!roomsListLoaded && <Loading />}
+					<Table striped hover size="sm">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Creator</th>
+								<th>Topic</th>
+								<th>Status</th>
+								<th>Actions</th>
 							</tr>
-						))}
-					</tbody>
-				</Table>
-			</div>
+						</thead>
+						<tbody>
+							{roomsList?.map((room: Room) => (
+								<tr key={room.id}>
+									<td>{room.name}</td>
+									<td>{room.creator}</td>
+									<td>{room.topic}</td>
+									<td>{room.status}</td>
+									<td>
+										{loading ? (
 
-			{loggedIn && (
-				<Container className="d-none d-md-block" style={{ maxWidth: 600 }}>
-					<CreateRoomForm />
-				</Container>
-			)}
+											<Button
+												variant="info"
+												disabled
+											>
+												<Spinner
+													as="span"
+													animation="grow"
+													size="sm"
+													role="status"
+													aria-hidden="true"
+												/>
+												{' '}Joining...
+											</Button>
+
+										) : (
+
+											<Button
+												variant="warning"
+												type="submit"
+												onClick={() => handleJoinRoom(room.id)}
+												disabled={!loggedIn}
+											>
+												Join
+											</Button>
+
+										)}
+										{user?.username === "admin" && (
+											<Button
+												variant="danger"
+												size="sm"
+												onClick={() => handleRemoveRoom(room.id)}
+											>
+												Remove
+											</Button>
+										)}
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</Table>
+				</Col>
+
+				{loggedIn && (
+					<Col>
+						<Container className="d-none d-md-block" style={{ maxWidth: 600 }}>
+							<CreateRoomForm />
+						</Container>
+					</Col>
+
+				)}
+			</Row>
 		</Container>
 	);
 }

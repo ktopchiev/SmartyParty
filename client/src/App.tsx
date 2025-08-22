@@ -13,7 +13,8 @@ import { HubConnectionState } from "@microsoft/signalr"
 import { setNavigate } from "./navigate/navigate"
 import { UserContext } from "./context/userContext"
 
-function App() {
+export default function App() {
+
 	const dispatch = useAppDispatch();
 	const [refresh, { error }] = useRefreshMutation();
 	const navigate = useNavigate();
@@ -21,10 +22,10 @@ function App() {
 
 	useEffect(() => {
 		setNavigate(navigate);
+
 	}, [navigate]);
 
 	useEffect(() => {
-
 		const startConnection = async () => {
 			try {
 				if (SignalRService.getSignalRConnection()?.state !== HubConnectionState.Connected) {
@@ -69,5 +70,3 @@ function App() {
 		</UserContext>
 	)
 }
-
-export default App
