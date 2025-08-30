@@ -5,7 +5,7 @@ import { store } from './services/store.ts';
 import App from './App.tsx'
 import HomePage from './features/HomePage.tsx';
 import QuizRoomPage from './features/QuizRoomPage.tsx';
-import { FinalPage } from './features/FinalPage.tsx';
+import FinalPage from './features/FinalPage.tsx';
 import NotFoundPage from './features/NotFoundPage.tsx';
 import ServerError from './errors/ServerError.tsx';
 import './index.css'
