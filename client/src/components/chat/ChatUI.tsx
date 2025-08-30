@@ -6,7 +6,7 @@ import ChatWindow from './ChatWindow';
 import { Modal, Button, Badge } from 'react-bootstrap';
 import { ChatDots } from 'react-bootstrap-icons';
 
-function ChatUI() {
+export default function ChatUI() {
 	const [showModal, setShowModal] = useState(false);
 	const { room } = useAppSelector((state: RootState) => state.rooms);
 	const { unreadMessages } = room || {};
@@ -78,5 +78,3 @@ function ChatUI() {
 		</>
 	);
 }
-
-export default ChatUI;
