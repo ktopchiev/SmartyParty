@@ -1,11 +1,10 @@
-import React from "react";
 import { useNavigate } from "react-router";
 import { useAppDispatch, useAppSelector } from "../services/store";
 import { removeRoom } from "../services/room/roomsSlice";
 import { Container, Row, Col, Card, Badge, Button } from "react-bootstrap";
 
 
-export const FinalPage: React.FC = () => {
+export default function FinalPage() {
 
     const { room } = useAppSelector((state) => state.rooms);
     const sortedPlayers = room?.players.slice().sort((a, b) => b.points - a.points);
