@@ -48,9 +48,6 @@ public class SmartyPartyHub : Hub
 
     public async Task SendMessage(MessageRequest messageRequest)
     {
-        //Remove this delay in production
-        await Task.Delay(2000);
-
         if (string.IsNullOrWhiteSpace(messageRequest.RoomId) || string.IsNullOrWhiteSpace(messageRequest.From) || string.IsNullOrWhiteSpace(messageRequest.Content))
         {
             throw new HubException("Invalid message");
@@ -147,8 +144,6 @@ public class SmartyPartyHub : Hub
 
     public async Task JoinRoom(string roomId, string username)
     {
-        //Remove this delay in production
-        await Task.Delay(2000);
 
         if (string.IsNullOrWhiteSpace(roomId) || string.IsNullOrWhiteSpace(username))
         {
