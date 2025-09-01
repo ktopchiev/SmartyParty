@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { useAppDispatch, useAppSelector } from "../services/store";
 import { removeRoom } from "../services/room/roomsSlice";
 import { Container, Row, Col, Card, Badge, Button } from "react-bootstrap";
+import SignalRService from "../services/signalR/SignalRService";
 
 
 export default function FinalPage() {
@@ -16,6 +17,7 @@ export default function FinalPage() {
 
     const handleBackToHome = () => {
         navigate("/");
+        SignalRService.startUserRoomConnection();
         if (room) {
             dispatch(removeRoom(room?.id));
         }

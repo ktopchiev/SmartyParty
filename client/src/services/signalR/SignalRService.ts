@@ -82,7 +82,7 @@ class SignalRService {
         });
 
         this.signalRConnection?.on("PlayerJoined", (player: Player) => {
-            console.log("Player joined")
+            console.log("Player joined");
             let msg: Message = {
                 roomId: "",
                 id: "",
@@ -127,6 +127,7 @@ class SignalRService {
 
         this.signalRConnection?.on("RoomCreated", (room: Room) => {
             if (this.onRoomCreatedCallback) {
+                console.log(`New room created - ${room.id}`)
                 this.onRoomCreatedCallback(room);
             }
         });
@@ -173,7 +174,6 @@ class SignalRService {
         }
 
         try {
-            console.log("Creating room with name:", roomName, "and topic:", topic);
             if (!roomName || !topic) {
                 let errMsg = "Room name and topic are required to create a room.";
                 console.error(errMsg);

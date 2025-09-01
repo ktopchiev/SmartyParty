@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { Outlet, useNavigate } from "react-router"
 import { Slide, toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
@@ -11,14 +11,12 @@ import Header from "./components/Header"
 import Footer from "./components/Footer"
 import { getJwtTokenFromLocalStorage } from "./util/utilities"
 import { setNavigate } from "./navigate/navigate"
-import { UserContext } from "./context/userContext"
 
 export default function App() {
 
 	const dispatch = useAppDispatch();
 	const [refresh, { error }] = useRefreshMutation();
 	const navigate = useNavigate();
-	const [user, setUser] = useState<string>("");
 
 	useEffect(() => {
 		setNavigate(navigate);
@@ -41,7 +39,6 @@ export default function App() {
 			if (localStorageUserData) {
 				let userData = await refresh().unwrap();
 				dispatch(setCurrentUser(userData));
-				setUser(userData.username);
 			}
 		};
 
@@ -56,17 +53,16 @@ export default function App() {
 	}, []);
 
 	return (
-		<UserContext value={user}>
+
+		<div>
+			<ToastContainer position="bottom-right" hideProgressBar={true} transition={Slide} autoClose={2000} theme="colored" />
+			<Header />
 			<div>
-				<ToastContainer position="bottom-right" hideProgressBar={true} transition={Slide} autoClose={2000} theme="colored" />
-				<Header />
-				<div>
-					<Outlet />
-				</div>
-				<footer>
-					<Footer />
-				</footer>
+				<Outlet />
 			</div>
-		</UserContext>
+			<footer>
+				<Footer />
+			</footer>
+		</div>
 	)
 }

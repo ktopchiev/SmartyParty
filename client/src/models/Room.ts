@@ -19,6 +19,7 @@ export type Question = {
     id: number;
     questionContent: string;
     options: Option[];
+    playersAnswered: string[];
 }
 
 /**

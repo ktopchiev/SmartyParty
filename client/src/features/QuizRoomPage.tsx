@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useContext } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 import { LogOut } from "lucide-react";
 import { toast } from "react-toastify";
@@ -14,7 +14,6 @@ import ChatUI from "../components/chat/ChatUI";
 import Loading from "../components/Loading";
 import AnimatedTimer from "../components/quiz-room/AnimatedTimer";
 import { useRoomTimer } from "../hooks/useRoomTimer";
-import { UserContext } from "../context/userContext";
 import {
 	Container,
 	Row,
@@ -25,6 +24,7 @@ import {
 	ListGroup,
 	Card,
 } from "react-bootstrap";
+import { getUserFromJwtToken } from "../util/utilities";
 
 
 export default function QuizRoomPage() {
@@ -37,7 +37,7 @@ export default function QuizRoomPage() {
 
 	const { timeLeft, roundHasEnded, startTimer } = useRoomTimer(roomId!, false);
 
-	const username = useContext(UserContext);
+	const username = getUserFromJwtToken();
 
 	const { room, status } = useAppSelector((state) => state.rooms);
 	const { currentAnswer, questionIndex, availability, gameStatus } = room || {};
@@ -67,7 +67,7 @@ export default function QuizRoomPage() {
 
 
 	const setGameFinale = async () => {
-		console.log("setGameFinale");
+		console.warn("setGameFinale");
 		await SignalRService.removeRoom(roomId!);
 		SignalRService.stopUserRoomConnection();
 		navigate(`/quizroom/${roomId!}/finale`);
@@ -76,7 +76,8 @@ export default function QuizRoomPage() {
 
 
 	useEffect(() => {
-		if (!isQuizEnded() && roundHasEnded) {
+		if (!isQuizEnded() && roundHasEnded || !isQuizEnded() && room?.questions[questionIndex || 0].playersAnswered.length === 2) {
+			console.log("hereeee");
 			updatePlayer((questionIndex || 0) + 1);
 		}
 
@@ -149,12 +150,13 @@ export default function QuizRoomPage() {
 			await SignalRService.startUserRoomConnection();
 		}
 
-		updatePlayer((questionIndex || 0), _option.isCorrect ? 10 : 0)
+		updatePlayer((questionIndex ?? 0), _option.isCorrect ? 10 : 0)
 
 		const answer: Answer = {
 			id: _option.id,
 			roomId: roomId!,
 			from: player?.username ?? "",
+			questionIndex: questionIndex ?? 0,
 			option: _option,
 		};
 		await SignalRService.sendAnswer(answer);
@@ -198,9 +200,10 @@ export default function QuizRoomPage() {
 	if (status === 'loading') return <Loading />
 
 	return (
-		<Container fluid="md" className="mt-2 bg-light text-dark" style={{ minHeight: "90vh", maxWidth: "1200px" }}>
+		<Container fluid="md" className="mt-2 bg-light text-dark" style={{ minHeight: "84vh", maxWidth: "1200px" }}>
 			<Row>
 				<Col md={8}>
+					{/* Room info div */}
 					<div className="d-flex justify-content-between align-items-start mb-3">
 						<Col xs={4} md={8}>
 							<Badge bg="dark" className="me-2">
@@ -310,6 +313,6 @@ export default function QuizRoomPage() {
 					<ChatUI />
 				</Col>
 			</Row>
-		</Container>
+		</Container >
 	);
 };

@@ -33,9 +33,9 @@ export default function ChatWindow({ roomId }: Props) {
 	};
 
 	return (
-		<Card className="shadow-lg rounded-4 border-0 border-dark ps-3" style={{ maxWidth: "300px", minHeight: "100%" }}>
+		<Card className="shadow-lg rounded-4 border-0 border-dark ps-3" >
 			<Card.Header className="text-muted small">Chat</Card.Header>
-			<Card.Body className="bg-white rounded mb-2" style={{ height: "60vh", overflowY: "auto" }}>
+			<Card.Body className="bg-white rounded mb-2" style={{ minHeight: '70vh' }}>
 				{room?.messages?.map((msg) => (
 					<Container
 						key={msg.id + msg.from}
@@ -89,6 +89,6 @@ export default function ChatWindow({ roomId }: Props) {
 					</Row>
 				</Form>
 			</Card.Footer>
-		</Card>
+		</Card >
 	);
 }

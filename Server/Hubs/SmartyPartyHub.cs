@@ -32,16 +32,23 @@ public class SmartyPartyHub : Hub
 
     public async Task SendAnswer(AnswerRequest answer)
     {
-        //Remove this delay in production
-        await Task.Delay(2000);
 
         if (string.IsNullOrWhiteSpace(answer.From) || string.IsNullOrWhiteSpace(answer.RoomId) || answer.Option == null)
         {
             throw new HubException("Invalid answer");
         }
 
+        int index = -1;
+        int points = 10;
         if (answer.Option.IsCorrect)
-            _userConnectionService.UpdatePlayerInRoom(answer.RoomId, answer.From, -1, 10);
+        {
+            _userConnectionService.UpdatePlayerInRoom(answer.RoomId, answer.From, index, points);
+        }
+
+
+        var room = _userConnectionService.GetRoomById(answer.RoomId);
+
+        room?.Questions[answer.Id].PlayersAnswered.Add(answer.From);
 
         await Clients.OthersInGroup(answer.RoomId).SendAsync("ReceiveAnswer", answer.ToAnswerResponse());
     }

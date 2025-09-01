@@ -113,6 +113,7 @@ namespace Server.Services
         public Player GetPlayerInRoomByUsername(string roomId, string username)
         {
             var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
+
             return room.Players.FirstOrDefault(p => p.Username == username);
         }
 

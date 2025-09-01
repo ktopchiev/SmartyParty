@@ -8,6 +8,7 @@ namespace Server.Models
         public int Id { get; set; }
         public string QuestionContent { get; set; } = string.Empty;
         public List<Option> Options { get; set; } = new();
+        public List<string> PlayersAnswered { get; set; } = new();
     }
 
     public static class QuestionResponseExtensions
@@ -18,7 +19,8 @@ namespace Server.Models
             {
                 Id = question.Id,
                 QuestionContent = question.QuestionContent,
-                Options = question.Options.Select(io => io.ToOptionResponse()).ToList()
+                Options = question.Options.Select(io => io.ToOptionResponse()).ToList(),
+                PlayersAnswered = question.PlayersAnswered
             };
         }
     }
