@@ -164,7 +164,7 @@ export default function CreateRoomForm() {
                             {' '}AI is generating the room...
                         </Button>
                     ) : (
-                        <Button variant="warning" type="submit">Create New Room</Button>
+                        <Button variant="warning" type="submit" name="Create room">Create New Room</Button>
                     )}
                 </Row>
             </Form>

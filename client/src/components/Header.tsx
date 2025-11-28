@@ -54,7 +54,8 @@ export default function Header() {
 							<p style={{ fontSize: "10px", margin: 0, padding: 0, fontWeight: "bold", color: "purple" }}>AI Powered</p>
 						</Col>
 					</div>
-					{ }
+
+					{/*This button is for developer purposes and should be removed in production*/}
 					<Button
 						variant="warning"
 						size="sm"
@@ -62,6 +63,7 @@ export default function Header() {
 							console.log({
 								state: SignalRService.getSignalRConnection()?.state,
 								id: SignalRService.getSignalRConnection()?.connectionId,
+								players: room?.players
 							})
 						}
 					>
@@ -91,8 +93,7 @@ export default function Header() {
 			</Navbar >
 
 			{/* Login Offcanvas */}
-			< Offcanvas show={showLogin} onHide={() => setShowLogin(false)
-			} placement="end" backdrop={true} >
+			< Offcanvas show={showLogin} onHide={() => setShowLogin(false)} placement="end" backdrop={true} id='#login-offcanvas'>
 				<Offcanvas.Header closeButton>
 					<Offcanvas.Title>Login</Offcanvas.Title>
 				</Offcanvas.Header>

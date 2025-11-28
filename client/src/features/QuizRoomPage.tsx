@@ -43,7 +43,7 @@ export default function QuizRoomPage() {
 	const { currentAnswer, questionIndex, availability, gameStatus } = room || {};
 	const dispatch = useAppDispatch();
 
-	const timer = 30;
+	const timer = 10;
 
 	const player = useMemo(() => {
 		return room?.players.find((p) => p.username === username);
@@ -114,7 +114,6 @@ export default function QuizRoomPage() {
 	useEffect(() => {
 		const joinRoom = async () => {
 			await SignalRService.joinRoom(roomId!, username);
-
 		}
 
 		if (status === 'ready') joinRoom();
@@ -141,7 +140,7 @@ export default function QuizRoomPage() {
 	};
 
 
-	const handleSelect = async (_option: Option, index: number) => {
+	const handleSelectAnswer = async (_option: Option, index: number) => {
 		if (showAnswer) return;
 		setSelectedOpt(index);
 		setShowAnswer(true);
@@ -279,7 +278,7 @@ export default function QuizRoomPage() {
 										<ListGroup.Item
 											key={idx}
 											action
-											onClick={() => handleSelect(opt, idx)}
+											onClick={() => handleSelectAnswer(opt, idx)}
 											active={isSelected}
 											disabled={showAnswer || timeLeft === 0 || gameStatus !== "start"}
 											variant={variant}
