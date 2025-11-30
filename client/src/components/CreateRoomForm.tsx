@@ -144,7 +144,7 @@ export default function CreateRoomForm() {
                             ))}
                         </Form.Select>
                         <Form.Select {...register("number")} defaultValue="5" className="mb-2">
-                            <option disabled value="Select number">Select number</option>
+                            <option disabled value="Select number">Select questions number</option>
                             {questionNumbers.map(num => (
                                 <option key={num.id} value={num.num}>{num.num}</option>
                             ))}

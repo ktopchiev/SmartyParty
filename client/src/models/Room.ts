@@ -19,7 +19,7 @@ export type Question = {
     id: number;
     questionContent: string;
     options: Option[];
-    playersAnswered: string[];
+    playersAnswered: number;
 }
 
 /**
@@ -57,7 +57,6 @@ export default interface Room {
     players: Player[];
     messages: Message[];
     questions: Question[];
-    allPlayersAnswered: boolean;
     questionIndex: number;
     gameStatus: GameStatus["status"];
     availability: 'open' | 'closed';

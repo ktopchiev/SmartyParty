@@ -35,15 +35,15 @@ export default function QuizRoomPage() {
 	const { roomId } = useParams<{ roomId: string }>();
 	const navigate = useNavigate();
 
-	const { timeLeft, roundHasEnded, startTimer } = useRoomTimer(roomId!, false);
+	const timer = 10;
+
+	const { timeLeft, roundHasEnded, startTimer } = useRoomTimer(roomId!, false, timer);
 
 	const username = getUserFromJwtToken();
 
 	const { room, status } = useAppSelector((state) => state.rooms);
 	const { currentAnswer, questionIndex, availability, gameStatus } = room || {};
 	const dispatch = useAppDispatch();
-
-	const timer = 10;
 
 	const player = useMemo(() => {
 		return room?.players.find((p) => p.username === username);
@@ -76,7 +76,7 @@ export default function QuizRoomPage() {
 
 
 	useEffect(() => {
-		if (!isQuizEnded() && roundHasEnded || !isQuizEnded() && room?.questions[questionIndex || 0].playersAnswered.length === 2) {
+		if (!isQuizEnded() && roundHasEnded || !isQuizEnded() && room?.questions[questionIndex || 0].playersAnswered === 2) {
 			console.log("hereeee");
 			updatePlayer((questionIndex || 0) + 1);
 		}
@@ -86,6 +86,8 @@ export default function QuizRoomPage() {
 		}
 
 	}, [roundHasEnded]);
+
+	
 
 
 	useEffect(() => {
@@ -231,7 +233,8 @@ export default function QuizRoomPage() {
 										key={i}
 										className="p-0 border-0 bg-light"
 										style={{
-											color: p.username === username ? '0px 2px 2px rgba(95, 252, 4, 1)' : 'black',
+											textShadow: p.username === username ? '1px 1px #000000' : 'none',
+											color: p.username === username ? 'lime' : 'black',
 											backgroundColor: p.username === username ? 'black' : 'none'
 										}}>
 										👤 {p.username} : {p.points} points

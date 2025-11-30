@@ -8,7 +8,7 @@ namespace Server.DTOs
         public int Id { get; set; }
         public string QuestionContent { get; set; } = string.Empty;
         public List<OptionResponse> Options { get; set; } = new List<OptionResponse>();
-        public List<string> PlayersAnswered { get; set; } = new();
+        public int PlayersAnswered { get; set; }
     }
 
     public static class QuestionResponseExtensions

@@ -49,7 +49,7 @@ public class SmartyPartyHub : Hub
 
         if (room == null) throw new HubException("Room not found");
 
-        room.Questions[answer.QuestionIndex].PlayersAnswered.Add(answer.From);
+        room.Questions[answer.QuestionIndex].PlayersAnswered += 1;
 
         await Clients.OthersInGroup(answer.RoomId).SendAsync("ReceiveAnswer", answer.ToAnswerResponse());
     }

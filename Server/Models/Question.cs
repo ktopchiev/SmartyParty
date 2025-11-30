@@ -8,7 +8,7 @@ namespace Server.Models
         public int Id { get; set; }
         public string QuestionContent { get; set; } = string.Empty;
         public List<Option> Options { get; set; } = new();
-        public List<string> PlayersAnswered { get; set; } = new();
+        public int PlayersAnswered { get; set; }
     }
 
     public static class QuestionResponseExtensions
