@@ -7,7 +7,7 @@ namespace Server.Services
         private static readonly List<Room> _Rooms = new();
         private static readonly List<Player> _Players = new();
 
-        public Player AddPlayer(string username, string connectionId)
+        public Player CreatePlayer(string username, string connectionId)
         {
             var player = new Player
             {
@@ -104,17 +104,13 @@ namespace Server.Services
             return room?.Players ?? new List<Player>();
         }
 
-        public Player GetPlayerInRoomByConnectionId(string roomId, string connectionId)
+        public Player GetPlayerInRoomByUsername(string roomId, string playerName)
         {
-            var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
-            return room.Players.FirstOrDefault(p => p.ConnectionId == connectionId);
-        }
-
-        public Player GetPlayerInRoomByUsername(string roomId, string username)
-        {
-            var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
-
-            return room.Players.FirstOrDefault(p => p.Username == username);
+            var room = _Rooms.FirstOrDefault(room => room.Id.ToString() == roomId);
+            if (room == null) return null;
+            var player = room.Players.FirstOrDefault(p => p.Username == playerName);
+            if (player == null) return null;
+            return player;
         }
 
         public string GetConnectionIdByPlayer(string player)
@@ -132,7 +128,7 @@ namespace Server.Services
 
             var player = _Players.FirstOrDefault(p => p.Username == playerUserName);
 
-            if (player == null) return;
+            if (player == null || room == null) return;
 
             player.ConnectionId = connectionId;
             room.Players.Add(player);
@@ -185,6 +181,7 @@ namespace Server.Services
         public void SetGameStatus(string roomId, string status)
         {
             var room = _Rooms.FirstOrDefault(r => r.Id.ToString() == roomId);
+            if (room == null) return;
             room.GameStatus = status;
         }
 

@@ -227,7 +227,13 @@ export default function QuizRoomPage() {
 							<Badge bg="primary">Players: {room?.players.length}/2</Badge>
 							<ListGroup variant="flush" className="mt-1 small">
 								{room?.players.map((p, i) => (
-									<ListGroup.Item key={i} className="p-0 border-0 bg-light" style={{ textShadow: p.username === username ? '0px 2px 2px rgba(15, 15, 15, 0.4)' : '' }}>
+									<ListGroup.Item
+										key={i}
+										className="p-0 border-0 bg-light"
+										style={{
+											color: p.username === username ? '0px 2px 2px rgba(95, 252, 4, 1)' : 'black',
+											backgroundColor: p.username === username ? 'black' : 'none'
+										}}>
 										👤 {p.username} : {p.points} points
 									</ListGroup.Item>
 								))}

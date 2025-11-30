@@ -45,10 +45,11 @@ public class SmartyPartyHub : Hub
             _userConnectionService.UpdatePlayerInRoom(answer.RoomId, answer.From, index, points);
         }
 
+        Room? room = _userConnectionService.GetRoomById(answer.RoomId);
 
-        var room = _userConnectionService.GetRoomById(answer.RoomId);
+        if (room == null) throw new HubException("Room not found");
 
-        room?.Questions[answer.Id].PlayersAnswered.Add(answer.From);
+        room.Questions[answer.QuestionIndex].PlayersAnswered.Add(answer.From);
 
         await Clients.OthersInGroup(answer.RoomId).SendAsync("ReceiveAnswer", answer.ToAnswerResponse());
     }
@@ -118,7 +119,7 @@ public class SmartyPartyHub : Hub
             throw new HubException("Invalid room details");
         }
 
-        _userConnectionService.AddPlayer(player, Context.ConnectionId);
+        _userConnectionService.CreatePlayer(player, Context.ConnectionId);
 
         var newRoom = _userConnectionService.AddRoom(roomName, topic, player, language, number, difficulty, Context.ConnectionId);
 
@@ -162,11 +163,11 @@ public class SmartyPartyHub : Hub
             throw new HubException("Room does not exist");
         }
 
-        var player = _userConnectionService.GetPlayerByUsername(username);
+        var player = _userConnectionService.GetPlayerInRoomByUsername(roomId, username);
 
         if (player == null)
         {
-            var newPlayer = _userConnectionService.AddPlayer(username, Context.ConnectionId);
+            var newPlayer = _userConnectionService.CreatePlayer(username, Context.ConnectionId);
             await Clients.Group(roomId).SendAsync("PlayerJoined", newPlayer.ToPlayerDto());
             _userConnectionService.AddPlayerToRoom(roomId, username, Context.ConnectionId);
         }
@@ -191,7 +192,7 @@ public class SmartyPartyHub : Hub
         _userConnectionService.RemovePlayerFromRoom(roomId, playerName);
 
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
-        await Clients.Group(roomId).SendAsync("PlayerLeft", playerName);
+        await Clients.Group(roomId).SendAsync("PlayerLeft", player);
     }
 
     public async Task GetRooms()

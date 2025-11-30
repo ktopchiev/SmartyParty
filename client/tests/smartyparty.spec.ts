@@ -16,8 +16,6 @@ test('login menu expands', async ({ page }) => {
   await openLoginForm(page);
 
   await expect(page.getByText('LoginUsernamePasswordSubmit')).toBeVisible();
-  // // Expects page to have a heading with the name of Installation.
-  // await expect(page.getByRole('Badge', { name: 'Installation' })).toBeVisible();
 });
 
 test('login', async ({ page }) => {

@@ -110,8 +110,6 @@ class SignalRService {
             const room = store.getState().rooms.room;
             if (room?.players.length === 0) {
                 store.dispatch(removeRoom(room.id));
-            } else {
-                store.dispatch(resetRoom());
             }
         });
 
